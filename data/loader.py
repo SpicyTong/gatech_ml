@@ -134,7 +134,7 @@ class DataLoader(ABC):
 
         return self.classes
 
-    def dump_test_train_val(self, test_size=0.2, random_state=123):
+    def dump_test_train_val(self, test_size=0.3, random_state=123):
         ds_train_x, ds_test_x, ds_train_y, ds_test_y = ms.train_test_split(self.features, self.classes,
                                                                            test_size=test_size,
                                                                            random_state=random_state,
@@ -223,6 +223,35 @@ class CreditDefaultData(DataLoader):
 
     def _preprocess_data(self):
         pass
+
+    def pre_training_adjustment(self, train_features, train_classes):
+        """
+        Perform any adjustments to training data before training begins.
+        :param train_features: The training features to adjust
+        :param train_classes: The training classes to adjust
+        :return: The processed data
+        """
+        return train_features, train_classes
+
+class SteelPlateData(DataLoader):
+
+    def __init__(self, path='data/Faults.NAA', verbose=False, seed=1):
+        super().__init__(path, verbose, seed)
+
+    def _load_data(self):
+        self._data = pd.read_csv(self._path, header=None, delimiter=r"\s+")
+
+
+    def data_name(self):
+        return 'SteelPlateData'
+
+    def class_column_name(self):
+        return '33'
+
+    def _preprocess_data(self):
+        class_cols = [27, 28, 29, 30, 31, 32, 33]
+        self.classes = np.where(self._data[class_cols] == 1)[1]
+        self._data.drop(self._data.columns[27:33], axis=1, inplace=True)
 
     def pre_training_adjustment(self, train_features, train_classes):
         """

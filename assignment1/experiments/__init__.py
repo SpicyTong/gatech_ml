@@ -83,7 +83,7 @@ def basic_results(clf, classes, training_x, training_y, test_x, test_y, params, 
         f.write('{},{},{},{}\n'.format(clf_type, dataset, test_score, cv.best_params_))
     n = training_y.shape[0]
     # TODO: Is the range here dependent on the dataset?
-    train_sizes = list(map(int, list(np.geomspace(max(n * 0.05, 50), n * 0.79, num=20, endpoint=True))))
+    train_sizes = list(map(int, list(np.geomspace(max(n * 0.1, 50), n * 0.79, num=20, endpoint=True))))
     train_sizes, train_scores, test_scores = ms.learning_curve(
         cv.best_estimator_,
         training_x,
