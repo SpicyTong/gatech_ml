@@ -137,7 +137,7 @@ class DTLearner(learners.BaseLearner):
         self.training_y = y.copy()
         self.training_weights = sample_weight.copy()
         # TODO: Make this tunable? at least random_state?
-        sss = ms.StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=123)
+        sss = ms.StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=123)
         for train_index, test_index in sss.split(self.training_x, self.training_y):
             self.value_x = self.training_x[test_index]
             self.value_y = self.training_y[test_index]

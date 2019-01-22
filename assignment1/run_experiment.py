@@ -32,15 +32,15 @@ if __name__ == '__main__':
     print("----------")
 
     if not args.no_set1:
-        ds1_data = loader.CreditDefaultData(verbose=verbose, seed=seed)
-        ds1_name = 'credit_default'
-        ds1_readable_name = 'Credit Default'
+        ds1_data = loader.HTRU2Data(verbose=verbose, seed=seed)
+        ds1_name = 'HTRU2Data'
+        ds1_readable_name = 'HTRU2Data'
         ds1_data.load_and_process()
 
     if not args.no_set2:
-        ds2_data = loader.SteelPlateData(verbose=verbose, seed=seed)
-        ds2_name = 'steel_faults'
-        ds2_readable_name = 'Steel Plate Faults'
+        ds2_data = loader.AusWeather(verbose=verbose, seed=seed)
+        ds2_name = 'AusWeather'
+        ds2_readable_name = 'AusWeather'
         ds2_data.load_and_process()
 
     if verbose:

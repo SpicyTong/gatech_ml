@@ -17,7 +17,7 @@ class BoostingExperiment(experiments.BaseExperiment):
         # Search for good alphas
         alphas = np.arange(1, 11)
 
-        max_depths = np.arange(1, 41, 1)  # np.arange(1, 11)
+        max_depths = np.arange(2, 25, 1)  # np.arange(1, 11)
         base = learners.DTLearner(criterion='gini', class_weight='balanced', random_state=self._details.seed)
         of_base = learners.DTLearner(criterion='gini', class_weight='balanced', random_state=self._details.seed)
 

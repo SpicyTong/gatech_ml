@@ -114,7 +114,7 @@ class DataLoader(ABC):
         if self.testing_x is not None:
             self.testing_x = StandardScaler().fit_transform(self.testing_x)
 
-    def build_train_test_split(self, test_size=0.3):
+    def build_train_test_split(self, test_size=0.2):
         if not self.training_x and not self.training_y and not self.testing_x and not self.testing_y:
             self.training_x, self.testing_x, self.training_y, self.testing_y = ms.train_test_split(
                 self.features, self.classes, test_size=test_size, random_state=self._seed, stratify=self.classes
@@ -235,7 +235,7 @@ class CreditDefaultData(DataLoader):
 
 class SteelPlateData(DataLoader):
 
-    def __init__(self, path='data/Faults.NAA', verbose=False, seed=1):
+    def __init__(self, path='data/Faults.NAA', verbose=False, seed=1, binarize=True):
         super().__init__(path, verbose, seed)
 
     def _load_data(self):
@@ -250,8 +250,114 @@ class SteelPlateData(DataLoader):
 
     def _preprocess_data(self):
         class_cols = [27, 28, 29, 30, 31, 32, 33]
+        # Collapse to integer encoded data
         self.classes = np.where(self._data[class_cols] == 1)[1]
+        # known_items = self.classes < 6
+        # unknown_items = self.classes == 6
+        # self.classes[known_items] = 0
+        # self.classes[unknown_items] = 11
         self._data.drop(self._data.columns[27:33], axis=1, inplace=True)
+
+    def pre_training_adjustment(self, train_features, train_classes):
+        """
+        Perform any adjustments to training data before training begins.
+        :param train_features: The training features to adjust
+        :param train_classes: The training classes to adjust
+        :return: The processed data
+        """
+        return train_features, train_classes
+
+
+class AusWeather(DataLoader):
+
+    def __init__(self, path='data/weatherAUS.csv', verbose=False, seed=1, binarize=True):
+        super().__init__(path, verbose, seed)
+
+    def _load_data(self):
+        self._data = pd.read_csv(self._path)
+
+
+    def data_name(self):
+        return 'AusWeather'
+
+    def class_column_name(self):
+        return 'RainTomorrow'
+
+    def _preprocess_data(self):
+        # Select on location
+        print(self._data.Location.unique())
+        keep_locations = ['Sydney', 'SydneyAirport', 'Brisbane',
+                          'Melbourne', 'MelbourneAirport', 'Canberra',
+                          'WaggaWagga', 'Wollongong']
+        new_sets = []
+        for loc in keep_locations:
+            new_sets.append(self._data[self._data['Location'] == loc])
+
+        self._data = pd.concat(new_sets)
+        self._data.pop('Location')
+
+        # Convert dates
+        # We want to convert dates to a year, month, and day feature column. Could be useful (more ran in fall, or 2008, etc.)
+        dates = pd.to_datetime(self._data.Date)
+        year = [d.day for d in dates]
+        month = [d.month for d in dates]
+        day = [d.day for d in dates]
+        self._data.pop('Date')
+        self._data['Year'] = year
+        self._data['Month'] = month
+        # self._data['Day'] = day
+
+        # Convert cardinal directions
+        directions_dict = {'E': 0., 'ENE': 22.5, 'NE': 45., 'NNE': 67.5, 'N': 90., 'NNW': 112.5, 'NW': 135., 'WNW': 157.5,
+                          'W': 180., 'WSW': 202.5, 'SW': 225., 'SSW': 247.5, 'S': 270., 'SSE': 292.5, 'SE': 315., 'ESE': 337.5}
+        self._data.WindDir9am = self._data.WindDir9am.map(directions_dict)
+        self._data.WindDir3pm = self._data.WindDir3pm.map(directions_dict)
+
+        # convert labels
+        self._data.replace({'No':0, 'Yes':1}, inplace=True)
+        # RainToday has some nans in it. replace with zeros.
+        self._data['RainToday'].fillna(0, inplace=True)
+
+        # Drop columns with lots of missing data
+        self._data.pop('WindGustDir')
+        self._data.pop('WindGustSpeed')
+        self._data.pop('Cloud9am')
+        self._data.pop('Cloud3pm')
+        self._data.pop("Evaporation")
+
+        # Drop attributes to make the data more interesting (maybe)
+        # self._data.pop('Humidity9am')
+        # self._data.pop('Humidity3pm')
+        # self._data.pop('RainToday')
+        # self._data.pop('WindDir9am')
+        # self._data.pop('WindDir3pm')
+        # self._data.pop("Pressure3pm")
+        # self._data.pop("Pressure9am")
+        # self._data.pop("WindSpeed9am")
+        # self._data.pop("WindSpeed3pm")
+        # self._data.pop("Sunshine")
+        
+        # Remove Risk_MM which can leak as per dataset description. Direct predictor of rain
+        self._data.pop("RISK_MM")
+
+        # Fill means for each column. Basic analysis shows not a ton of nans are left.
+        # for col in self._data.keys():
+        #     self._data[col].fillna((self._data[col].mean()), inplace=True)
+
+        self._data.dropna(how='any', inplace=True)
+
+        # Put labels at end
+        classes = self._data.pop('RainTomorrow')
+        self._data['RainTomorrow'] = classes
+        self._data.reset_index()
+
+        num_positive = self._data[self._data.RainTomorrow == 1].RainTomorrow.sum()
+        df1 = self._data[self._data.RainTomorrow == 0].sample(num_positive, random_state=13)
+        df2 = self._data[self._data.RainTomorrow == 1]
+        # pd.DataFrame.sample()
+
+        self._data = pd.concat([df1, df2]).sample(frac=1)
+
 
     def pre_training_adjustment(self, train_features, train_classes):
         """
@@ -377,6 +483,39 @@ class SpamData(DataLoader):
 
     def pre_training_adjustment(self, train_features, train_classes):
         return train_features, train_classes
+
+
+class SkyServerData(DataLoader):
+    def __init__(self, path='data/skyserver_sql2.csv', verbose=False, seed=1):
+        super().__init__(path, verbose, seed)
+
+    def _load_data(self):
+        self._data = pd.read_csv(self._path)
+
+    def data_name(self):
+        return 'SkyServer'
+
+    def class_column_name(self):
+        return 'class'
+
+    def _preprocess_data(self):
+        # Convert class categories to codes.
+        # https://stackoverflow.com/questions/30510562/get-mapping-of-categorical-variables-in-pandas
+        self._data['class'] = self._data['class'].astype('category').cat.codes
+        # Also push classes to the end.
+        classes = self._data.pop('class')
+        self._data['class'] = classes
+
+        self._data.pop('objid')
+        self._data.pop('specobjid')
+        self._data.pop('rerun')
+        self._data.pop('run')
+        self._data.pop('camcol')
+
+
+    def pre_training_adjustment(self, train_features, train_classes):
+        return train_features, train_classes
+
 
 
 class StatlogVehicleData(DataLoader):

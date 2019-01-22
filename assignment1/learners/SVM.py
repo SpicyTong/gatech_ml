@@ -36,6 +36,9 @@ class SVMLearner(learners.BaseLearner):
         self._alpha = alpha
         self._gamma_frac = gamma_frac
         self._n_iter = n_iter
+        # self._learner = SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0, degree=3,
+        #                     kernel='linear', max_iter=-1, probability=True,
+        #                     random_state=None, shrinking=True, tol=0.001, verbose=False)
         self._learner = SGDClassifier(loss=loss,
                                       penalty=penalty,
                                       alpha=self._alpha,
