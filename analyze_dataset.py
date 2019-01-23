@@ -20,7 +20,6 @@ if __name__ == '__main__':
     verbose = args.verbose
 
 all_sets = []
-
 if args.steel:
     dataset = loader.SteelPlateData(verbose=args.verbose)
     dataset.load_and_process()
