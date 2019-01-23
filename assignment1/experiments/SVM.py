@@ -36,7 +36,7 @@ class SVMExperiment(experiments.BaseExperiment):
             threads=self._details.threads, verbose=self._verbose)
 
         of_params = best_params.copy()
-        # of_params['SVM__alpha'] = 1e-16
+        of_params['SVM__alpha'] = 1e-16
         learner = learners.SVMLearner(n_jobs=self._details.threads)
         experiments.perform_experiment(self._details.ds, self._details.ds_name, self._details.ds_readable_name, learner,
                                        'SVM_RBF_OF', 'SVM', of_params, seed=self._details.seed,

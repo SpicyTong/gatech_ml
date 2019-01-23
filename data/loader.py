@@ -257,6 +257,7 @@ class SteelPlateData(DataLoader):
         # self.classes[known_items] = 0
         # self.classes[unknown_items] = 11
         self._data.drop(self._data.columns[27:33], axis=1, inplace=True)
+        self._data.columns = self._data.columns.astype(str)
 
     def pre_training_adjustment(self, train_features, train_classes):
         """

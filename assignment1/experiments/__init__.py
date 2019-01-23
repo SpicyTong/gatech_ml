@@ -37,6 +37,7 @@ def balanced_accuracy(truth, pred):
     return accuracy_score(truth, pred, sample_weight=wts)
 
 
+# Try with f1? classification_report
 scorer = make_scorer(balanced_accuracy)
 
 

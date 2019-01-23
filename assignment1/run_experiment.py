@@ -32,7 +32,7 @@ if __name__ == '__main__':
     print("----------")
 
     if not args.no_set1:
-        ds1_data = loader.HTRU2Data(verbose=verbose, seed=seed)
+        ds1_data = loader.SteelPlateData(verbose=verbose, seed=seed)
         ds1_name = 'HTRU2Data'
         ds1_readable_name = 'HTRU2Data'
         ds1_data.load_and_process()

@@ -1,4 +1,6 @@
 import numpy as np
+
+from sklearn.svm import SVC
 from sklearn.linear_model import stochastic_gradient, SGDClassifier
 from sklearn.metrics import euclidean_distances
 from sklearn.metrics.pairwise import rbf_kernel
