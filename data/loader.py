@@ -235,8 +235,9 @@ class CreditDefaultData(DataLoader):
 
 class SteelPlateData(DataLoader):
 
-    def __init__(self, path='data/Faults.NAA', verbose=False, seed=1, binarize=True):
+    def __init__(self, path='data/Faults.NAA', verbose=False, seed=1, binarize=False):
         super().__init__(path, verbose, seed)
+        self.binarize = binarize
 
     def _load_data(self):
         self._data = pd.read_csv(self._path, header=None, delimiter=r"\s+")
@@ -252,11 +253,13 @@ class SteelPlateData(DataLoader):
         class_cols = [27, 28, 29, 30, 31, 32, 33]
         # Collapse to integer encoded data
         self.classes = np.where(self._data[class_cols] == 1)[1]
-        # known_items = self.classes < 6
-        # unknown_items = self.classes == 6
-        # self.classes[known_items] = 0
-        # self.classes[unknown_items] = 11
-        self._data.drop(self._data.columns[27:33], axis=1, inplace=True)
+        if self.binarize:
+            known_items = self.classes < 6
+            unknown_items = self.classes == 6
+            self.classes[known_items] = 0
+            self.classes[unknown_items] = 1
+        self._data.drop(self._data.columns[27:34], axis=1, inplace=True)
+        self._data['33'] = self.classes
         self._data.columns = self._data.columns.astype(str)
 
     def pre_training_adjustment(self, train_features, train_classes):

@@ -3,6 +3,7 @@ matplotlib.use('TKAgg')
 
 import argparse
 import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 import copy
 from data import loader
@@ -21,14 +22,21 @@ if __name__ == '__main__':
 
 all_sets = []
 if args.steel:
-    dataset = loader.SteelPlateData(verbose=args.verbose)
+    keep = ['0', '2', '8', '13', '33']
+    log = ['13', '0']
+    dataset = loader.SteelPlateData(verbose=args.verbose, binarize=True)
     dataset.load_and_process()
+    dataset._data = dataset._data[keep]
+    dataset._data[log] = np.log(dataset._data[log])
+
+
     all_sets.append(dataset)
 
 if args.rain:
+    keep = ['MinTemp', 'Sunshine', 'WindSpeed3pm', 'Humidity3pm', 'RainToday', 'RainTomorrow']
     dataset = loader.AusWeather(verbose=args.verbose)
     dataset.load_and_process()
-    # TODO not sure if I actually need to deepcopy?
+    dataset._data = dataset._data[keep]
     all_sets.append(dataset)
 
 if args.credit_default:
