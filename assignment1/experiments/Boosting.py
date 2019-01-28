@@ -17,7 +17,7 @@ class BoostingExperiment(experiments.BaseExperiment):
         # Search for good alphas
         alphas = np.arange(1, 11)
 
-        max_depths = np.arange(1, 11)
+        max_depths = np.arange(4, 25)
         base = learners.DTLearner(criterion='gini', class_weight='balanced', random_state=self._details.seed)
         of_base = learners.DTLearner(criterion='gini', class_weight='balanced', random_state=self._details.seed)
 
@@ -27,12 +27,15 @@ class BoostingExperiment(experiments.BaseExperiment):
                                               random_state=self._details.seed)
 
         # TODO: No 90 here?
-        params = {'Boost__n_estimators': [1, 2, 5, 10, 20, 30, 45, 60, 80, 100],
+        n_est = [4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 45, 60, 80, 100]
+        params = {'Boost__n_estimators': n_est,
                   'Boost__base_estimator__max_depth': max_depths}
-        iteration_params = {'Boost__n_estimators': [1, 2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-        of_params = {'Boost__base_estimator__max_depth': 100, 'Boost__n_estimators': 50}
+        iteration_params = {'Boost__base_estimator__max_depth': max_depths}
+
+        
+        of_params = {'Boost__base_estimator__max_depth': 7, 'Boost__n_estimators': 50}
         complexity_param = {'name': 'Boost__n_estimators', 'display_name': 'Estimator count', 'x_scale': 'log',
-                            'values': [1, 2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
+                            'values': n_est}
 
         experiments.perform_experiment(self._details.ds, self._details.ds_name, self._details.ds_readable_name, booster,
                                        'Boost', 'Boost', params, complexity_param=complexity_param,

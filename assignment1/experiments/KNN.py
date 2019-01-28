@@ -14,7 +14,7 @@ class KNNExperiment(experiments.BaseExperiment):
 
     def perform(self):
         # Adapted from https://github.com/JonathanTay/CS-7641-assignment-1/blob/master/KNN.py
-        params = {'KNN__metric': ['manhattan', 'euclidean', 'chebyshev'], 'KNN__n_neighbors': np.arange(1, 51, 3),
+        params = {'KNN__metric': ['euclidean'], 'KNN__n_neighbors': np.arange(1, 51, 3),
                   'KNN__weights': ['uniform', 'distance']}
         complexity_param = {'name': 'KNN__n_neighbors', 'display_name': 'Neighbor count', 'values': np.arange(1, 51, 1)}
 
