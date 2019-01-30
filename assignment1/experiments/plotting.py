@@ -5,6 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+import pandas as pd
+import seaborn as sn
+plt.set_cmap(sn.cm.rocket)
+
+
 # Adapted from http://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
 def plot_learning_curve(title, train_sizes, train_scores, test_scores, ylim=None, multiple_runs=True,
                         x_scale='linear', y_scale='linear',
@@ -235,26 +240,36 @@ def plot_confusion_matrix(cm, classes,
     else:
         print('Confusion matrix, without normalization')
 
-    print(cm)
+    # print("WJAT akljhsdlfkjhasdlkjfhasd I dont get it")
 
     plt.close()
     plt.figure()
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-    plt.tight_layout()
+    dat = pd.DataFrame(cm, classes, classes)
+    confusion = sn.heatmap(dat, annot=True, fmt='.2g')
 
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.0
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+    confusion.set(xlabel='Prediction', ylabel='Actual')
+    return confusion.get_figure()
 
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+
+    # plt.close()
+    # plt.figure()
+    # plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    # plt.title(title)
+    # plt.colorbar()
+    # tick_marks = np.arange(len(classes))
+    # plt.xticks(tick_marks, classes, rotation=45)
+    # plt.yticks(tick_marks, classes)
+    # plt.tight_layout()
+
+    # fmt = '.2f' if normalize else 'd'
+    # thresh = cm.max() / 2.0
+    # for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+    #     plt.text(j, i, format(cm[i, j], fmt),
+    #              horizontalalignment="center",
+    #              color="white" if cm[i, j] > thresh else "black")
+
+    # plt.tight_layout()
+    # plt.ylabel('True label')
+    # plt.xlabel('Predicted label')
     return plt

@@ -12,6 +12,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import compute_sample_weight
 
+from matplotlib import pyplot as plt
+import seaborn as sn
+plt.set_cmap(sn.cm.rocket)
+
 from .base import *
 from .ANN import *
 from .Boosting import *
