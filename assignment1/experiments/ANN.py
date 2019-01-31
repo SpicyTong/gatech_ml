@@ -16,18 +16,18 @@ class ANNExperiment(experiments.BaseExperiment):
 
         # TODO: Allow for tuning of hidden layers based on dataset provided
         d = self._details.ds.features.shape[1]
-        # hiddens = [(h,) * l for l in [1, 2, 3] for h in [d, d // 4, d * 2]]
-        hiddens = [(h) for h in [d, d // 16, d * 2]]
+        hiddens = [(h,) * l for l in [1, 2, 3] for h in [d, d // 4, d * 2]]
+        # hiddens = [(h) for h in [d, d // 16, d * 2]]
 
         params = {'MLP__activation': ['relu', 'logistic'], 'MLP__alpha': alphas,
                 #   'MLP__hidden_layer_sizes': hiddens,
                   'MLP__max_iter': [2000]}
 
         timing_params = {'MLP__early_stopping': False}
-        # iteration_params = {'MLP__max_iter':
-        #                     [2 ** x for x in range(12)] + [2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900,
-        #                                                    3000]}
-        iteration_params = {'MLP__hidden_layer_sizes': hiddens}
+        iteration_params = {'MLP__max_iter':
+                            [2 ** x for x in range(12)] + [2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900,
+                                                           3000]}
+        # iteration_params = {'MLP__hidden_layer_sizes': hiddens}
         
         complexity_param = {'name': 'MLP__alpha', 'display_name': 'Alpha', 'x_scale': 'log',
                             'values': alphas}

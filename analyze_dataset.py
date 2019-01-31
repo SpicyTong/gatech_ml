@@ -12,6 +12,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Perform some SL experiments')
     parser.add_argument('--steel', action='store_true', help='Analyze steel plate fault dataset')
     parser.add_argument('--rain', action='store_true')
+    parser.add_argument('--skyserver', action='store_true')
     parser.add_argument('--credit_default', action='store_true')
     parser.add_argument('--kde', action='store_true', default=True, help='Map the lower triangle to a distribution')
     parser.add_argument('--file', type=str, default="output.png")
@@ -41,6 +42,11 @@ if args.rain:
 
 if args.credit_default:
     dataset = loader.CreditDefaultData(verbose=args.verbose)
+    dataset.load_and_process()
+    all_sets.append(dataset)
+
+if args.skyserver:
+    dataset = loader.SkyServerData(verbose=args.verbose)
     dataset.load_and_process()
     all_sets.append(dataset)
 

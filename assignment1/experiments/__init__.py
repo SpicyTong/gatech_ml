@@ -6,7 +6,7 @@ import pandas as pd
 import sklearn.model_selection as ms
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
-from sklearn.metrics import make_scorer, accuracy_score, confusion_matrix
+from sklearn.metrics import make_scorer, accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import validation_curve
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -40,9 +40,14 @@ def balanced_accuracy(truth, pred):
     wts = compute_sample_weight('balanced', truth)
     return accuracy_score(truth, pred, sample_weight=wts)
 
+def compute_f1(truth, pred):
+    score = f1_score(truth, pred, average="weighted")
+    return score
+
 
 # Try with f1? classification_report
-scorer = make_scorer(balanced_accuracy)
+# scorer = make_scorer(balanced_accuracy)
+scorer = make_scorer(compute_f1)
 
 
 def basic_results(clf, classes, training_x, training_y, test_x, test_y, params, clf_type=None, dataset=None,
