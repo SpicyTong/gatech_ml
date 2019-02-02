@@ -246,7 +246,7 @@ def plot_confusion_matrix(cm, classes,
     plt.figure()
     plt.title(title)
     dat = pd.DataFrame(cm, classes, classes)
-    confusion = sn.heatmap(dat, annot=True, fmt='.2g')
+    confusion = sn.heatmap(dat, annot=True, fmt='.4g')
 
     confusion.set(xlabel='Prediction', ylabel='Actual')
     return confusion.get_figure()

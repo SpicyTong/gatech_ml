@@ -517,6 +517,15 @@ class SkyServerData(DataLoader):
         self._data.pop('camcol')
 
 
+        num_fewest = self._data[self._data['class'] == 1]['class'].sum()
+        num_to_take = int(np.round(num_fewest * 1.5))
+        df1 = self._data[self._data['class'] == 0].sample(num_to_take, random_state=13)
+        df2 = self._data[self._data['class'] == 2].sample(num_to_take, random_state=13)
+        df3 = self._data[self._data['class'] == 1]
+
+        self._data = pd.concat([df1, df2, df3]).sample(frac=1)
+
+
     def pre_training_adjustment(self, train_features, train_classes):
         return train_features, train_classes
 

@@ -12,7 +12,7 @@ class ANNLearner(learners.BaseLearner):
                  batch_size='auto',
                  learning_rate="constant",
                  learning_rate_init=0.001,
-                 power_t=0.5, max_iter=500,
+                 power_t=0.5, max_iter=1500,
                  shuffle=True,
                  random_state=None,
                  tol=1e-4,
