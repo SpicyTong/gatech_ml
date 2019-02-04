@@ -82,12 +82,15 @@ def basic_results(clf, classes, training_x, training_y, test_x, test_y, params, 
         best_estimator = cv.best_estimator_.fit(training_x, training_y)
         final_estimator = best_estimator._final_estimator
         grid_best_params = pd.DataFrame([final_estimator.get_params()])
+        test_y_predicted = cv.predict(test_x)
+        best_score = balanced_accuracy(test_y, test_y_predicted)
+
+        grid_best_params['score'] = best_score
         grid_best_params.to_csv('{}/{}_{}_best_params.csv'.format(OUTPUT_DIRECTORY, clf_type, dataset), index=False)
         logger.info(" - Grid search complete")
 
         final_estimator.write_visualization('{}/images/{}_{}_LC'.format(OUTPUT_DIRECTORY, clf_type, dataset))
 
-        test_y_predicted = cv.predict(test_x)
         cnf_matrix = confusion_matrix(test_y, test_y_predicted)
         np.set_printoptions(precision=2)
         plt = plot_confusion_matrix(cnf_matrix, classes,
@@ -108,8 +111,7 @@ def basic_results(clf, classes, training_x, training_y, test_x, test_y, params, 
 
     n = training_y.shape[0]
 
-    train_sizes = np.append(np.linspace(0.05, 0.1, 20, endpoint=False),
-                            np.linspace(0.1, 1, 20, endpoint=True))
+    train_sizes = np.linspace(0.05, 1, 50, endpoint=True)
     logger.info(" - n: {}, train_sizes: {}".format(n, train_sizes))
     train_sizes, train_scores, test_scores = ms.learning_curve(
         clf if best_params is not None else cv.best_estimator_,

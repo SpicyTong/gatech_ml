@@ -24,6 +24,7 @@ class SVMExperiment(experiments.BaseExperiment):
 
         best_params_linear = None
         best_params_rbf = None
+        complexity_param = None
         # Uncomment to select known best params from grid search. This will skip the grid search and just rebuild
         # the various graphs
         #
@@ -33,10 +34,10 @@ class SVMExperiment(experiments.BaseExperiment):
         # best_params_rbf = {'C': 2.0, 'class_weight': 'balanced', 'decision_function_shape': 'ovo',
         #                    'gamma': 0.05555555555555555, 'max_iter': -1, 'tol': 1e-08}
         # Dataset 2:
-        # best_params_linear = {'C': 1.0, 'class_weight': 'balanced', 'loss': 'hinge', 'dual': True,
-        #                       'max_iter': 70, 'tol': 0.08000001}
-        # best_params_rbf = {'C': 1.5, 'class_weight': 'balanced', 'decision_function_shape': 'ovo',
-        #                    'gamma': 0.125, 'max_iter': -1, 'tol': 0.07000001}
+        # best_params_linear = {'C': 1.001, 'class_weight': 'balanced', 'loss': 'squared_hinge', 'dual': False,
+        #                       'max_iter': 153, 'tol': 0.08000001}
+        # best_params_rbf = {'C': 1.251, 'class_weight': 'balanced', 'decision_function_shape': 'ovo',
+        #                    'gamma': 0.05882453, 'max_iter': -1, 'tol': 1e-8}
 
         # Linear SVM
         params = {'SVM__max_iter': iters, 'SVM__tol': tols, 'SVM__class_weight': ['balanced'],
@@ -73,28 +74,28 @@ class SVMExperiment(experiments.BaseExperiment):
                                        threads=self._details.threads, verbose=self._verbose,
                                        iteration_lc_only=True)
 
-        # # RBF SVM
-        # params = {'SVM__max_iter': iters, 'SVM__tol': tols, 'SVM__class_weight': ['balanced'],
-        #           'SVM__C': C_values,
-        #           'SVM__decision_function_shape': ['ovo', 'ovr'], 'SVM__gamma': gamma_fracs}
-        # complexity_param = {'name': 'SVM__C', 'display_name': 'Penalty', 'values': np.arange(0.001, 2.5, 0.1)}
+        # RBF SVM
+        params = {'SVM__max_iter': iters, 'SVM__tol': tols, 'SVM__class_weight': ['balanced'],
+                  'SVM__C': C_values,
+                  'SVM__decision_function_shape': ['ovo', 'ovr'], 'SVM__gamma': gamma_fracs}
+        complexity_param = {'name': 'SVM__C', 'display_name': 'Penalty', 'values': np.arange(0.001, 2.5, 0.1)}
 
-        # learner = learners.SVMLearner(kernel='rbf')
-        # if best_params_rbf is not None:
-        #     learner.set_params(**best_params_rbf)
-        # best_params = experiments.perform_experiment(
-        #     self._details.ds, self._details.ds_name, self._details.ds_readable_name, learner, 'SVM_RBF', 'SVM',
-        #     params, complexity_param=complexity_param, seed=self._details.seed, iteration_details=iteration_details,
-        #     best_params=best_params_rbf,
-        #     threads=self._details.threads, verbose=self._verbose)
+        learner = learners.SVMLearner(kernel='rbf')
+        if best_params_rbf is not None:
+            learner.set_params(**best_params_rbf)
+        best_params = experiments.perform_experiment(
+            self._details.ds, self._details.ds_name, self._details.ds_readable_name, learner, 'SVM_RBF', 'SVM',
+            params, complexity_param=complexity_param, seed=self._details.seed, iteration_details=iteration_details,
+            best_params=best_params_rbf,
+            threads=self._details.threads, verbose=self._verbose)
 
-        # of_params = best_params.copy()
-        # learner = learners.SVMLearner(kernel='rbf')
-        # if best_params_rbf is not None:
-        #     learner.set_params(**best_params_rbf)
-        # experiments.perform_experiment(self._details.ds, self._details.ds_name, self._details.ds_readable_name, learner,
-        #                                'SVM_RBF_OF', 'SVM', of_params, seed=self._details.seed,
-        #                                iteration_details=iteration_details,
-        #                                best_params=best_params_rbf,
-        #                                threads=self._details.threads, verbose=self._verbose,
-        #                                iteration_lc_only=True)
+        of_params = best_params.copy()
+        learner = learners.SVMLearner(kernel='rbf')
+        if best_params_rbf is not None:
+            learner.set_params(**best_params_rbf)
+        experiments.perform_experiment(self._details.ds, self._details.ds_name, self._details.ds_readable_name, learner,
+                                       'SVM_RBF_OF', 'SVM', of_params, seed=self._details.seed,
+                                       iteration_details=iteration_details,
+                                       best_params=best_params_rbf,
+                                       threads=self._details.threads, verbose=self._verbose,
+                                       iteration_lc_only=True)

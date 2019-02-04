@@ -46,7 +46,7 @@ if args.credit_default:
     all_sets.append(dataset)
 
 if args.skyserver:
-    keep = ['g', 'z', 'field', 'redshift', 'ra', 'class']
+    keep = ['g', 'dec', 'field', 'redshift', 'ra', 'class']
 
     dataset = loader.SkyServerData(verbose=args.verbose)
     dataset.load_and_process()

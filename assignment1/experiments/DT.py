@@ -11,7 +11,7 @@ class DTExperiment(experiments.BaseExperiment):
 
     def perform(self):
         # TODO: Clean up the older alpha stuff?
-        max_depths = np.arange(1, 51, 1)
+        max_depths = np.arange(2, 51, 1)
         params = {'DT__criterion': ['gini', 'entropy'], 'DT__max_depth': max_depths,
                   'DT__class_weight': ['balanced', None]}  # , 'DT__max_leaf_nodes': max_leaf_nodes}
         complexity_param = {'name': 'DT__max_depth', 'display_name': 'Max Depth', 'values': max_depths}
@@ -24,7 +24,7 @@ class DTExperiment(experiments.BaseExperiment):
         # best_params = {'criterion': 'entropy', 'max_depth': 23, 'class_weight': 'balanced'}
         #
         # Dataset 2:
-        # best_params = {'criterion': 'entropy', 'max_depth': 4, 'class_weight': 'balanced'}
+        # best_params = {'criterion': 'entropy', 'max_depth': 5, 'class_weight': 'balanced'}
 
         learner = learners.DTLearner(random_state=self._details.seed)
         if best_params is not None:
