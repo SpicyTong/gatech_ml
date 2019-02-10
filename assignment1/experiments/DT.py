@@ -12,9 +12,14 @@ class DTExperiment(experiments.BaseExperiment):
     def perform(self):
         # TODO: Clean up the older alpha stuff?
         max_depths = np.arange(2, 51, 1)
+
+        # Rerun with new alphas!!!!!! NEED MOOOOOOOOOOORE GRANULARITY
+        alphas = np.arange(-.1, .1, .01)
+
         params = {'DT__criterion': ['gini', 'entropy'], 'DT__max_depth': max_depths,
                   'DT__class_weight': ['balanced', None]}  # , 'DT__max_leaf_nodes': max_leaf_nodes}
         complexity_param = {'name': 'DT__max_depth', 'display_name': 'Max Depth', 'values': max_depths}
+        # complexity_param = {'name': 'DT__alpha', 'display_name': 'Alpha (Prune Param)', 'values': alphas}
 
         best_params = None
         # Uncomment to select known best params from grid search. This will skip the grid search and just rebuild

@@ -15,20 +15,20 @@ class ANNExperiment(experiments.BaseExperiment):
         alphas = [10 ** -x for x in np.arange(-1, 9.01, 0.5)]
 
         # TODO: Allow for better tuning of hidden layers based on dataset provided
-        d = self._details.ds.features.shape[1]
-        hiddens = [(h,) * l for l in [1, 2, 3] for h in [d, d // 2, d * 2]]
+        d = 3 * self._details.ds.features.shape[1] // 2
+        hiddens = [(h,) * l for l in [1, 2, 3, 4] for h in [d//2, d // 2, d * 2]]
+        # hiddens = [(h,) for h in [d, d // 4, d * 2]]
         learning_rates = sorted([(2**x)/1000 for x in range(8)]+[0.000001])
 
         params = {'MLP__activation': ['relu', 'logistic'], 'MLP__alpha': alphas,
                   'MLP__learning_rate_init': learning_rates,
                   'MLP__hidden_layer_sizes': hiddens}
 
-        timing_params = {'MLP__early_stopping': False}
+        timing_params = {'MLP__early_stopping': True}
         iteration_details = {
             'x_scale': 'log',
             'params': {'MLP__max_iter':
-                            [2 ** x for x in range(12)] + [2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900,
-                                                           3000]},
+                            [2 ** x for x in range(14)]},
             'pipe_params': timing_params
         }
         complexity_param = {'name': 'MLP__alpha', 'display_name': 'Alpha', 'x_scale': 'log',
@@ -61,7 +61,7 @@ class ANNExperiment(experiments.BaseExperiment):
 
         # TODO: This should turn OFF regularization
         of_params = cv_best_params.copy()
-        of_params['MLP__alpha'] = 0
+        of_params['MLP__alpha'] = 1e-10
         if best_params is not None:
             learner.set_params(**best_params)
         learner = learners.ANNLearner(max_iter=3000, early_stopping=True, random_state=self._details.seed,

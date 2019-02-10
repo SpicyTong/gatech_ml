@@ -47,7 +47,7 @@ def balanced_accuracy(truth, pred):
 
 def f1_accuracy(truth, pred):
     wts = compute_sample_weight('balanced', truth)
-    return f1_score(truth, pred, average="binary", sample_weight=wts)
+    return f1_score(truth, pred, average="weighted", sample_weight=wts)
 
 
 scorer = make_scorer(balanced_accuracy)
@@ -63,7 +63,7 @@ def basic_results(clf, classes, training_x, training_y, test_x, test_y, params, 
     if seed is not None:
         np.random.seed(seed)
 
-    curr_scorer = scorer
+    curr_scorer = f1_scorer
     if not balanced_dataset:
         curr_scorer = f1_scorer
 
@@ -83,7 +83,7 @@ def basic_results(clf, classes, training_x, training_y, test_x, test_y, params, 
         final_estimator = best_estimator._final_estimator
         grid_best_params = pd.DataFrame([final_estimator.get_params()])
         test_y_predicted = cv.predict(test_x)
-        best_score = balanced_accuracy(test_y, test_y_predicted)
+        best_score = f1_accuracy(test_y, test_y_predicted)
 
         grid_best_params['score'] = best_score
         grid_best_params.to_csv('{}/{}_{}_best_params.csv'.format(OUTPUT_DIRECTORY, clf_type, dataset), index=False)
@@ -230,7 +230,7 @@ def make_timing_curve(x, y, clf, clf_name, dataset, dataset_readable_name, verbo
 def make_complexity_curve(x, y, param_name, param_display_name, param_values, clf, clf_name, dataset,
                           dataset_readable_name, x_scale, verbose=False, balanced_dataset=False, threads=1):
     logger.info("Building model complexity curve")
-    curr_scorer = scorer
+    curr_scorer = f1_scorer
     if not balanced_dataset:
         curr_scorer = f1_scorer
 
