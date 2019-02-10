@@ -1,3 +1,10 @@
+This is a fork of the original Chad Maron code that has been updated for my own assignments in CS7641.
+
+The original repository can be found here:
+
+https://github.com/cmaron/CS-7641-assignments
+
+
 # CS 7641 Assignments
 
 This repo is full of code for [CS 7641 - Machine Learning](https://www.omscs.gatech.edu/cs-7641-machine-learning) at Georgia Tech. 
