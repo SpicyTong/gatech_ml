@@ -1,0 +1,3 @@
+[submodule "third-party/mlrose"]
+	path = third-party/mlrose
+	url = https://github.com/gkhayes/mlrose.git
