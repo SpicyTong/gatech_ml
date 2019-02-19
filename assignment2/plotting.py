@@ -6,8 +6,7 @@ import os
 
 sns.set_style("darkgrid")
 
-
-def plot_simulated_annealing(problem, alg, sweep_dict={}):
+def plot_montecarlo_sensitivity(problem, alg, sweep_dict={}):
     """
     For a given problem, plot the scores and timing information in the dictionary.
 

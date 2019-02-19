@@ -6,33 +6,45 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.metrics import accuracy_score
 
-from alg_runner import sim_annealing_runner, rhc_runner
-from plotting import *
+from alg_runner import sim_annealing_runner, rhc_runner, ga_runner, mimic_runner
+from plotting import plot_montecarlo_sensitivity
 
 np.random.seed(1)
-problem_size = 100
+problem_size = 50
 
 
 if __name__ == "__main__":
 
     # TODO Write state regeneration functions as lamdas
     peaks_fit = mlrose.ContinuousPeaks(t_pct=.1)
-    init_state = np.random.randint(2, size=problem_size)
+    cpeaks_state_gen = lambda: np.random.randint(2, size=problem_size)
+    init_state = cpeaks_state_gen()
     problem = mlrose.DiscreteOpt(length=problem_size, fitness_fn=peaks_fit, maximize=True, max_val=2)
 
     print("Running simulated annealing montecarlos")
-    results = sim_annealing_runner(problem, init_state)
-    plot_simulated_annealing('CPeaks', 'sim_anneal', results)
+    results, timing = sim_annealing_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'sim_anneal', results)
+    plot_montecarlo_sensitivity('CPeaks', 'sim_anneal_timing', timing)
 
     print("Running random hill montecarlos")
-    results = rhc_runner(problem, init_state)
-    plot_simulated_annealing('CPeaks', 'rhc', results)
+    results, timing = rhc_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'rhc', results)
+    plot_montecarlo_sensitivity('CPeaks', 'rhc_timing', timing)
 
     print("Running genetic algorithm montecarlos")
-    results = rhc_runner(problem, init_state)
-    plot_simulated_annealing('CPeaks', 'ga', results)
+    results, timing = ga_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'ga', results)
+    plot_montecarlo_sensitivity('CPeaks', 'ga_timing', timing)
 
     print("Running MIMIC montecarlos")
-    results = rhc_runner(problem, init_state)
-    plot_simulated_annealing('CPeaks', 'mimic', results)
+    results, timing = mimic_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'mimic', results)
+    plot_montecarlo_sensitivity('CPeaks', 'mimic_timing', timing)
+
+
+
+
+
+
+    # Travelling sales?
 
