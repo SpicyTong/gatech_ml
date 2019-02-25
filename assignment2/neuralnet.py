@@ -5,10 +5,12 @@ import logging
 import random as rand
 from datetime import datetime
 from data import loader
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -48,11 +50,11 @@ if __name__ == '__main__':
     #     'name': 'htru2',
     #     'readable_name': 'HTRU2',
     # },
-    # {
-    #     'data': loader.SkyServerData(verbose=verbose, seed=seed),
-    #     'name': 'SkyServer',
-    #     'readable_name': 'SkyServer',
-    # },
+    {
+        'data': loader.SkyServerData(verbose=verbose, seed=seed),
+        'name': 'SkyServer',
+        'readable_name': 'SkyServer',
+    },
     {
         'data': loader.AusWeather(verbose=verbose, seed=seed),
         'name': 'AusWeather',
@@ -74,8 +76,13 @@ if __name__ == '__main__':
     for ds in datasets:
         data = ds['data']
         data.load_and_process()
+        data._data.pop(data._data.columns[-1])
         # Generate test/train splits.
         X_train, X_test, y_train, y_test = train_test_split(data._data, data.classes, test_size = 0.3)
+        n_features = X_train.shape[1]
+        print("Total dataset size: " + str(len(data._data)))
+        print("Total test size: " + str(len(X_test)))
+        print("Number of features: " + str(n_features))
 
         scaler = MinMaxScaler()
 
@@ -88,51 +95,65 @@ if __name__ == '__main__':
         y_test_hot = one_hot.transform(y_test.reshape(-1, 1)).todense()
         # TODO match pipeline from before
 
-        nn_model1 = mlrose.NeuralNetwork(hidden_nodes = [2], activation ='relu', 
+        nn_model0 = mlrose.NeuralNetwork(hidden_nodes = [n_features, n_features], activation ='relu', 
                                         algorithm ='random_hill_climb', 
-                                        max_iters = 2000, bias = True, is_classifier = True, 
+                                        max_iters = 4000, bias = False, is_classifier = True, 
                                         learning_rate = 0.0001, early_stopping = True, 
                                         clip_max = 5, max_attempts = 1000)
 
-        nn_model1.fit(X_train_scaled, y_train_hot)
-        y_test_pred = nn_model1.predict(X_test_scaled)
+        nn_model0.fit(X_train_scaled, y_train_hot)
+        y_test_pred = nn_model0.predict(X_test_scaled)
         y_test_accuracy = accuracy_score(y_test_hot, y_test_pred)
+        plt.figure()
+        rhc_cm = confusion_matrix(y_test_hot.argmax(1), y_test_pred.argmax(1))
+        sns.heatmap(rhc_cm, annot=True)
 
         logger.info(ds['name'] + ": RHC accuracy --> " + str(y_test_accuracy))
 
 
-        nn_model1 = mlrose.NeuralNetwork(hidden_nodes = [2], activation ='relu', 
+        nn_model1 = mlrose.NeuralNetwork(hidden_nodes = [n_features, n_features], activation ='relu', 
                                         algorithm ='simulated_annealing', 
-                                        max_iters = 1000, bias = True, is_classifier = True, 
+                                        max_iters = 4000, bias = False, is_classifier = True, 
                                         learning_rate = 0.0001, early_stopping = True, 
                                         clip_max = 5, max_attempts = 100)
 
         nn_model1.fit(X_train_scaled, y_train_hot)
         y_test_pred = nn_model1.predict(X_test_scaled)
         y_test_accuracy = accuracy_score(y_test_hot, y_test_pred)
+        plt.figure()
+        sa_cm = confusion_matrix(y_test_hot.argmax(1), y_test_pred.argmax(1))
+        sns.heatmap(sa_cm, annot=True)
 
         logger.info(ds['name'] + ": SA accuracy --> " + str(y_test_accuracy))
 
-        nn_model1 = mlrose.NeuralNetwork(hidden_nodes = [2], activation ='relu', 
+        nn_model2 = mlrose.NeuralNetwork(hidden_nodes = [n_features], activation ='relu', 
                                         algorithm ='genetic_alg', 
-                                        max_iters = 1000, bias = True, is_classifier = True, 
+                                        max_iters = 4000, bias = False, is_classifier = True, 
                                         learning_rate = 0.0001, early_stopping = True, 
                                         clip_max = 5, max_attempts = 100)
 
-        nn_model1.fit(X_train_scaled, y_train_hot)
-        y_test_pred = nn_model1.predict(X_test_scaled)
+        nn_model2.fit(X_train_scaled, y_train_hot)
+        y_test_pred = nn_model2.predict(X_test_scaled)
         y_test_accuracy = accuracy_score(y_test_hot, y_test_pred)
+        plt.figure()
+        ga_cm = confusion_matrix(y_test_hot.argmax(1), y_test_pred.argmax(1))
+        sns.heatmap(ga_cm, annot=True)
 
         logger.info(ds['name'] + ": GA accuracy --> " + str(y_test_accuracy))
 
-        nn_model1 = mlrose.NeuralNetwork(hidden_nodes = [2], activation ='relu', 
+        nn_model3 = mlrose.NeuralNetwork(hidden_nodes = [n_features], activation ='relu', 
                                         algorithm ='gradient_descent', 
-                                        max_iters = 1000, bias = True, is_classifier = True, 
+                                        max_iters = 2000, bias = False, is_classifier = True, 
                                         learning_rate = 0.0001, early_stopping = True, 
-                                        clip_max = 5, max_attempts = 100)
+                                        clip_max = 5, max_attempts = 200)
 
-        nn_model1.fit(X_train_scaled, y_train_hot)
-        y_test_pred = nn_model1.predict(X_test_scaled)
+        nn_model3.fit(X_train_scaled, y_train_hot)
+        y_test_pred = nn_model3.predict(X_test_scaled)
         y_test_accuracy = accuracy_score(y_test_hot, y_test_pred)
+        plt.figure()
+        gd_cm = confusion_matrix(y_test_hot.argmax(1), y_test_pred.argmax(1))
+        sns.heatmap(gd_cm, annot=True)
 
         logger.info(ds['name'] + ": GD accuracy --> " + str(y_test_accuracy))
+
+        plt.show()

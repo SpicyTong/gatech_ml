@@ -292,7 +292,7 @@ class AusWeather(DataLoader):
         print(self._data.Location.unique())
         keep_locations = ['Sydney', 'SydneyAirport', 'Brisbane',
                           'Melbourne', 'MelbourneAirport', 'Canberra',
-                          'WaggaWagga', 'Wollongong']
+                          'WaggaWagga', 'Wollongong', 'Perth', 'PerthAirport', 'Tuggeranong', 'Adelaide']
         new_sets = []
         for loc in keep_locations:
             new_sets.append(self._data[self._data['Location'] == loc])
@@ -358,7 +358,6 @@ class AusWeather(DataLoader):
         num_positive = self._data[self._data.RainTomorrow == 1].RainTomorrow.sum()
         df1 = self._data[self._data.RainTomorrow == 0].sample(num_positive, random_state=13)
         df2 = self._data[self._data.RainTomorrow == 1]
-        # pd.DataFrame.sample()
 
         self._data = pd.concat([df1, df2]).sample(frac=1)
 
