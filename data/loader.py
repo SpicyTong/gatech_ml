@@ -291,8 +291,7 @@ class AusWeather(DataLoader):
         # Select on location
         print(self._data.Location.unique())
         keep_locations = ['Sydney', 'SydneyAirport', 'Brisbane',
-                          'Melbourne', 'MelbourneAirport', 'Canberra',
-                          'WaggaWagga', 'Wollongong', 'Perth', 'PerthAirport', 'Tuggeranong', 'Adelaide']
+                          'Melbourne', 'MelbourneAirport', 'Canberra']
         new_sets = []
         for loc in keep_locations:
             new_sets.append(self._data[self._data['Location'] == loc])
