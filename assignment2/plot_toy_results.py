@@ -1,13 +1,9 @@
-# import cpeaks
-# import knapsack
-# import flipflop
 import os
 import pandas as pd
 from plotting import plot_problem_size_time, plot_iteration_fit, plot_problem_size_scores
 
-OUTPUT = './output'
 
-def plot_toy_problems(problem_list, plot_time=True, plot_iterations=True, plot_scores=True):
+def plot_toy_problems(problem_list, plot_time=True, plot_iterations=True, plot_scores=True, OUTPUT='./output'):
     # For each problem, read the relevant CSVs and call the plot method.
     for problem in problem_list:
         if plot_time:
@@ -37,5 +33,5 @@ def plot_toy_problems(problem_list, plot_time=True, plot_iterations=True, plot_s
             plot_problem_size_scores(iteration_frame, problem)
 
 if __name__ == '__main__':
-    problems = ['FlipFlop', 'CPeaks', 'Knapsack', 'TSP']
+    problems = ['FlipFlop', 'CPeaks', 'Knapsack']
     plot_toy_problems(problems)

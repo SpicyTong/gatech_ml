@@ -11,58 +11,62 @@ from sklearn.metrics import accuracy_score
 from alg_runner import sim_annealing_runner, rhc_runner, ga_runner, mimic_runner
 from plotting import plot_montecarlo_sensitivity
 
+import os
 import pickle
 from datetime import datetime
-
-
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+
 
 np.random.seed(1)
-problem_size = 50
 
 
-if __name__ == "__main__":
+def run_flipflop():
 
-    # # TODO Write state regeneration functions as lamdas
-    # flip_fit = mlrose.FlipFlop()
-    # flop_state_gen = lambda: np.random.randint(2, size=problem_size)
-    # init_state = flop_state_gen()
-    # problem = mlrose.DiscreteOpt(length=problem_size, fitness_fn=flip_fit, maximize=True, max_val=2)
+    # If the output/Cpeaks directory doesn't exist, create it.
+    if not os.path.exists('./output/FlipFlop/'):
+        os.mkdir('./output/FlipFlop/')
 
-    # all_results = {}
+    # TODO Write state regeneration functions as lamdas
+    problem_size = 50
+    logger = logging.getLogger(__name__)
+    flip_fit = mlrose.FlipFlop()
+    flop_state_gen = lambda: np.random.randint(2, size=problem_size)
+    init_state = flop_state_gen()
+    problem = mlrose.DiscreteOpt(length=problem_size, fitness_fn=flip_fit, maximize=True, max_val=2)
 
-    # print("Running simulated annealing montecarlos")
-    # sa_results, sa_timing = sim_annealing_runner(problem, init_state, state_regenerator=flop_state_gen)
-    # plot_montecarlo_sensitivity('FlipFlop', 'sim_anneal', sa_results)
-    # plot_montecarlo_sensitivity('FlipFlop', 'sim_anneal_timing', sa_timing)
-    # all_results['SA'] = [sa_results, sa_timing]
+    all_results = {}
 
-
-    # print("Running random hill montecarlos")
-    # rhc_results, rhc_timing = rhc_runner(problem, init_state, state_regenerator=flop_state_gen)
-    # plot_montecarlo_sensitivity('FlipFlop', 'rhc', rhc_results)
-    # plot_montecarlo_sensitivity('FlipFlop', 'rhc_timing', sa_timing)
-    # all_results['RHC'] = [rhc_results, rhc_timing]
-
-    # print("Running genetic algorithm montecarlos")
-    # ga_results, ga_timing = ga_runner(problem, init_state, state_regenerator=flop_state_gen)
-    # plot_montecarlo_sensitivity('FlipFlop', 'ga', ga_results)
-    # plot_montecarlo_sensitivity('FlipFlop', 'ga_timing', ga_timing)
-    # all_results['GA'] = [ga_results, ga_timing]
-
-    # print("Running MIMIC montecarlos")
-    # mimic_results, mimic_timing = mimic_runner(problem, init_state, state_regenerator=flop_state_gen)
-    # plot_montecarlo_sensitivity('FlipFlop', 'mimic', mimic_results)
-    # plot_montecarlo_sensitivity('FlipFlop', 'mimic_timing', mimic_timing)
-    # all_results['MIMIC'] = [mimic_results, mimic_timing]
+    print("Running simulated annealing montecarlos")
+    sa_results, sa_timing = sim_annealing_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('FlipFlop', 'sim_anneal', sa_results)
+    plot_montecarlo_sensitivity('FlipFlop', 'sim_anneal_timing', sa_timing)
+    all_results['SA'] = [sa_results, sa_timing]
 
 
-    # with open('./output/FlipFlop/flipflip_data.pickle', 'wb') as handle:
-    #     pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Running random hill montecarlos")
+    rhc_results, rhc_timing = rhc_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('FlipFlop', 'rhc', rhc_results)
+    plot_montecarlo_sensitivity('FlipFlop', 'rhc_timing', sa_timing)
+    all_results['RHC'] = [rhc_results, rhc_timing]
 
-    problem_size_space = np.linspace(10, 125, 2, dtype=int)
+    print("Running genetic algorithm montecarlos")
+    ga_results, ga_timing = ga_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('FlipFlop', 'ga', ga_results)
+    plot_montecarlo_sensitivity('FlipFlop', 'ga_timing', ga_timing)
+    all_results['GA'] = [ga_results, ga_timing]
+
+    print("Running MIMIC montecarlos")
+    mimic_results, mimic_timing = mimic_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('FlipFlop', 'mimic', mimic_results)
+    plot_montecarlo_sensitivity('FlipFlop', 'mimic_timing', mimic_timing)
+    all_results['MIMIC'] = [mimic_results, mimic_timing]
+
+
+    with open('./output/FlipFlop/flipflip_data.pickle', 'wb') as handle:
+        pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    problem_size_space = np.linspace(10, 125, 20, dtype=int)
 
     best_fit_dict = {}
     best_fit_dict['Problem Size'] = problem_size_space
@@ -144,3 +148,6 @@ if __name__ == "__main__":
     fit_frame.to_csv('./output/FlipFlop/problem_size_fit.csv')
     time_frame.to_csv('./output/FlipFlop/problem_size_time.csv')
     fit_iteration_frame.to_csv('./output/FlipFlop/fit_per_iteration.csv')
+
+if __name__ == "__main__":
+    run_flipflop()

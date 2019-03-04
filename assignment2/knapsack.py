@@ -7,6 +7,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.metrics import accuracy_score
+import os
 
 from alg_runner import sim_annealing_runner, rhc_runner, ga_runner, mimic_runner
 from plotting import plot_montecarlo_sensitivity
@@ -20,52 +21,56 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 np.random.seed(1)
-problem_size = 25
+
+def run_knapsack():
+
+    if not os.path.exists('./output/Knapsack/'):
+        os.mkdir('./output/Knapsack/')
+    # TODO Write state regeneration functions as lamdas
 
 
-if __name__ == "__main__":
+    logger = logging.getLogger(__name__)
+    problem_size = 25
+    prob_size_int = int(problem_size)
+    weights = [int(np.random.randint(1, prob_size_int/2)) for _ in range(prob_size_int)]
+    values = [int(np.random.randint(1, prob_size_int/2)) for _ in range(prob_size_int)]
+    flip_fit = mlrose.Knapsack(weights, values)
+    flop_state_gen = lambda: np.random.randint(0, 1, size=prob_size_int)
+    init_state = flop_state_gen()
+    problem = mlrose.DiscreteOpt(length=prob_size_int, fitness_fn=flip_fit, maximize=True, max_val=2)
 
-#     # TODO Write state regeneration functions as lamdas
-#     prob_size_int = int(problem_size)
-#     weights = [int(np.random.randint(1, prob_size_int/2)) for _ in range(prob_size_int)]
-#     values = [int(np.random.randint(1, prob_size_int/2)) for _ in range(prob_size_int)]
-#     flip_fit = mlrose.Knapsack(weights, values)
-#     flop_state_gen = lambda: np.random.randint(prob_size_int//4, prob_size_int//2, size=prob_size_int)
-#     init_state = flop_state_gen()
-#     problem = mlrose.DiscreteOpt(length=prob_size_int, fitness_fn=flip_fit, maximize=True, max_val=2)
+    all_results = {}
 
-#     all_results = {}
-
-#     print("Running simulated annealing montecarlos")
-#     sa_results, sa_timing = sim_annealing_runner(problem, init_state, state_regenerator=flop_state_gen)
-#     plot_montecarlo_sensitivity('Knapsack', 'sim_anneal', sa_results)
-#     plot_montecarlo_sensitivity('Knapsack', 'sim_anneal_timing', sa_timing)
-#     all_results['SA'] = [sa_results, sa_timing]
-
-
-#     print("Running random hill montecarlos")
-#     rhc_results, rhc_timing = rhc_runner(problem, init_state, state_regenerator=flop_state_gen)
-#     plot_montecarlo_sensitivity('Knapsack', 'rhc', rhc_results)
-#     plot_montecarlo_sensitivity('Knapsack', 'rhc_timing', sa_timing)
-#     all_results['RHC'] = [rhc_results, rhc_timing]
-
-#     print("Running genetic algorithm montecarlos")
-#     ga_results, ga_timing = ga_runner(problem, init_state, state_regenerator=flop_state_gen)
-#     plot_montecarlo_sensitivity('Knapsack', 'ga', ga_results)
-#     plot_montecarlo_sensitivity('Knapsack', 'ga_timing', ga_timing)
-#     all_results['GA'] = [ga_results, ga_timing]
-
-#     print("Running MIMIC montecarlos")
-#     mimic_results, mimic_timing = mimic_runner(problem, init_state, state_regenerator=flop_state_gen)
-#     plot_montecarlo_sensitivity('Knapsack', 'mimic', mimic_results)
-#     plot_montecarlo_sensitivity('Knapsack', 'mimic_timing', mimic_timing)
-#     all_results['MIMIC'] = [mimic_results, mimic_timing]
+    print("Running simulated annealing montecarlos")
+    sa_results, sa_timing = sim_annealing_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('Knapsack', 'sim_anneal', sa_results)
+    plot_montecarlo_sensitivity('Knapsack', 'sim_anneal_timing', sa_timing)
+    all_results['SA'] = [sa_results, sa_timing]
 
 
-#     with open('./output/Knapsack/flipflip_data.pickle', 'wb') as handle:
-#         pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Running random hill montecarlos")
+    rhc_results, rhc_timing = rhc_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('Knapsack', 'rhc', rhc_results)
+    plot_montecarlo_sensitivity('Knapsack', 'rhc_timing', sa_timing)
+    all_results['RHC'] = [rhc_results, rhc_timing]
 
-    problem_size_space = np.linspace(5, 30, 2, dtype=int)
+    print("Running genetic algorithm montecarlos")
+    ga_results, ga_timing = ga_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('Knapsack', 'ga', ga_results)
+    plot_montecarlo_sensitivity('Knapsack', 'ga_timing', ga_timing)
+    all_results['GA'] = [ga_results, ga_timing]
+
+    print("Running MIMIC montecarlos")
+    mimic_results, mimic_timing = mimic_runner(problem, init_state, state_regenerator=flop_state_gen)
+    plot_montecarlo_sensitivity('Knapsack', 'mimic', mimic_results)
+    plot_montecarlo_sensitivity('Knapsack', 'mimic_timing', mimic_timing)
+    all_results['MIMIC'] = [mimic_results, mimic_timing]
+
+
+    with open('./output/Knapsack/flipflip_data.pickle', 'wb') as handle:
+        pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    problem_size_space = np.linspace(5, 80, 20, dtype=int)
 
     best_fit_dict = {}
     best_fit_dict['Problem Size'] = problem_size_space
@@ -149,3 +154,6 @@ if __name__ == "__main__":
     fit_frame.to_csv('./output/Knapsack/problem_size_fit.csv')
     time_frame.to_csv('./output/Knapsack/problem_size_time.csv')
     fit_iteration_frame.to_csv('./output/Knapsack/fit_per_iteration.csv')
+
+if __name__ == "__main__":
+    run_knapsack()

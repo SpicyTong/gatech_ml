@@ -6,64 +6,67 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.metrics import accuracy_score
+import os
 
 from alg_runner import sim_annealing_runner, rhc_runner, ga_runner, mimic_runner
 from plotting import plot_montecarlo_sensitivity
 
 from datetime import datetime
+import pandas as pd
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 np.random.seed(1)
-problem_size = 50
-import pandas as pd
 
 
-if __name__ == "__main__":
+def run_cpeaks():
+    
+    
+    # If the output/Cpeaks directory doesn't exist, create it.
+    if not os.path.exists('./output/CPeaks/'):
+        os.mkdir('./output/CPeaks/')
 
-    # # TODO Write state regeneration functions as lamdas
-    # peaks_fit = mlrose.ContinuousPeaks(t_pct=.1)
-    # cpeaks_state_gen = lambda: np.random.randint(2, size=problem_size)
-    # init_state = cpeaks_state_gen()
-    # problem = mlrose.DiscreteOpt(length=problem_size, fitness_fn=peaks_fit, maximize=True, max_val=2)
+    problem_size = 50
+    peaks_fit = mlrose.ContinuousPeaks(t_pct=.1)
+    cpeaks_state_gen = lambda: np.random.randint(2, size=problem_size)
+    init_state = cpeaks_state_gen()
+    problem = mlrose.DiscreteOpt(length=problem_size, fitness_fn=peaks_fit, maximize=True, max_val=2)
 
-    # all_results = {}
+    all_results = {}
 
-    # print("Running simulated annealing montecarlos")
-    # sa_results, sa_timing = sim_annealing_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
-    # plot_montecarlo_sensitivity('CPeaks', 'sim_anneal', sa_results)
-    # plot_montecarlo_sensitivity('CPeaks', 'sim_anneal_timing', sa_timing)
-    # all_results['SA'] = [sa_results, sa_timing]
-
-
-    # print("Running random hill montecarlos")
-    # rhc_results, rhc_timing = rhc_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
-    # plot_montecarlo_sensitivity('CPeaks', 'rhc', rhc_results)
-    # plot_montecarlo_sensitivity('CPeaks', 'rhc_timing', sa_timing)
-    # all_results['RHC'] = [rhc_results, rhc_timing]
-
-    # print("Running genetic algorithm montecarlos")
-    # ga_results, ga_timing = ga_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
-    # plot_montecarlo_sensitivity('CPeaks', 'ga', ga_results)
-    # plot_montecarlo_sensitivity('CPeaks', 'ga_timing', ga_timing)
-    # all_results['GA'] = [ga_results, ga_timing]
-
-    # print("Running MIMIC montecarlos")
-    # mimic_results, mimic_timing = mimic_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
-    # plot_montecarlo_sensitivity('CPeaks', 'mimic', mimic_results)
-    # plot_montecarlo_sensitivity('CPeaks', 'mimic_timing', mimic_timing)
-    # all_results['MIMIC'] = [mimic_results, mimic_timing]
+    print("Running simulated annealing montecarlos")
+    sa_results, sa_timing = sim_annealing_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'sim_anneal', sa_results)
+    plot_montecarlo_sensitivity('CPeaks', 'sim_anneal_timing', sa_timing)
+    all_results['SA'] = [sa_results, sa_timing]
 
 
-    # with open('./output/CPeaks/cpeaks_data.pickle', 'wb') as handle:
-    #     pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Running random hill montecarlos")
+    rhc_results, rhc_timing = rhc_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'rhc', rhc_results)
+    plot_montecarlo_sensitivity('CPeaks', 'rhc_timing', sa_timing)
+    all_results['RHC'] = [rhc_results, rhc_timing]
+
+    print("Running genetic algorithm montecarlos")
+    ga_results, ga_timing = ga_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'ga', ga_results)
+    plot_montecarlo_sensitivity('CPeaks', 'ga_timing', ga_timing)
+    all_results['GA'] = [ga_results, ga_timing]
+
+    print("Running MIMIC montecarlos")
+    mimic_results, mimic_timing = mimic_runner(problem, init_state, state_regenerator=cpeaks_state_gen)
+    plot_montecarlo_sensitivity('CPeaks', 'mimic', mimic_results)
+    plot_montecarlo_sensitivity('CPeaks', 'mimic_timing', mimic_timing)
+    all_results['MIMIC'] = [mimic_results, mimic_timing]
 
 
-    # Iterate over problem size and record ?????????
-    # Ideally: Number of iterations to convergence
-    # Time
+    with open('./output/CPeaks/cpeaks_data.pickle', 'wb') as handle:
+        pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+
     problem_size_space = np.linspace(10, 100, 20, dtype=int)
 
     best_fit_dict = {}
@@ -135,9 +138,14 @@ if __name__ == "__main__":
     # time_frame.pop('Unnamed: 0') # idk why this shows up.
     fit_iteration_frame = pd.DataFrame.from_dict(fits_per_iteration, orient='index').transpose()
 
+
+
     fit_frame.to_csv('./output/CPeaks/problem_size_fit.csv')
     time_frame.to_csv('./output/CPeaks/problem_size_time.csv')
     fit_iteration_frame.to_csv('./output/CPeaks/fit_per_iteration.csv')
+
+if __name__ == "__main__":
+    run_cpeaks()
     
 
 

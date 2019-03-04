@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.metrics import accuracy_score
 from datetime import datetime
 
-MONTECARLO_COUNT = 5
+MONTECARLO_COUNT = 7
 MC_RUNS = range(MONTECARLO_COUNT)
 
 def sim_annealing_runner(problem, state, state_regenerator=None):
@@ -252,9 +252,9 @@ def mimic_runner(problem, state, gen_plots=True, state_regenerator=None):
     # of iterations
     """
     problem_size = len(state)
-    attempts = np.arange(1, 25, 5).astype(int)
-    pop_size = np.arange(problem_size//4, problem_size * 4, problem_size//4).astype(int)
-    percents = np.arange(.1, .6, .1)
+    attempts = np.arange(25, 25, 1).astype(int)
+    pop_size = np.arange(problem_size//4, problem_size * 6, problem_size//4).astype(int)
+    percents = np.arange(.005, .3, .01)
 
     scoring_dict = {}
     timing_dict = {}
@@ -276,8 +276,8 @@ def mimic_runner(problem, state, gen_plots=True, state_regenerator=None):
             times.append((end-start).total_seconds())
         attempt_timing.append(times)
         attempts_scores.append(best_fits)
-    scoring_dict['Number of Attempts'] = pd.DataFrame(attempts_scores, columns=MC_RUNS, index=attempts)
-    timing_dict['Number of Attempts'] = pd.DataFrame(attempt_timing, columns=MC_RUNS, index=attempts)
+    scoring_dict['NumberofAttempts'] = pd.DataFrame(attempts_scores, columns=MC_RUNS, index=attempts)
+    timing_dict['NumberofAttempts'] = pd.DataFrame(attempt_timing, columns=MC_RUNS, index=attempts)
 
 
     population_scores = []
@@ -296,8 +296,8 @@ def mimic_runner(problem, state, gen_plots=True, state_regenerator=None):
             times.append((end-start).total_seconds())
         population_scores.append(best_fits)
         population_timing.append(times)
-    scoring_dict['Population Size'] = pd.DataFrame(population_scores, columns=MC_RUNS, index=pop_size)
-    timing_dict['Population Size'] = pd.DataFrame(population_timing, columns=MC_RUNS, index=pop_size)
+    scoring_dict['PopulationSize'] = pd.DataFrame(population_scores, columns=MC_RUNS, index=pop_size)
+    timing_dict['PopulationSize'] = pd.DataFrame(population_timing, columns=MC_RUNS, index=pop_size)
 
     mutation_scores = []
     print("Running mutation rate sweep")
@@ -307,9 +307,9 @@ def mimic_runner(problem, state, gen_plots=True, state_regenerator=None):
         for i in MC_RUNS:
             init_state = state_regenerator()
             print("Running percentage kept sweep " + str(prcnt) + ": " + str(i))
-            _, best_fitness = mlrose.mimic(problem, pop_size=problem_size, keep_pct=prcnt, max_attempts=10)
+            _, best_fitness = mlrose.mimic(problem, pop_size=problem_size*2, keep_pct=prcnt, max_attempts=20)
             best_fits.append(best_fitness)
         mutation_scores.append(best_fits)
-    scoring_dict['Percentage Kept'] = pd.DataFrame(mutation_scores, columns=MC_RUNS, index=percents)
+    scoring_dict['PercentageKept'] = pd.DataFrame(mutation_scores, columns=MC_RUNS, index=percents)
 
     return scoring_dict, timing_dict

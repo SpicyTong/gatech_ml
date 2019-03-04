@@ -62,6 +62,7 @@ def plot_complexity(data, complexity_param, plot_prefix, pretty_name=None, plot_
         ax1 = fig.add_subplot(111)
         ax1.plot(x_values, mean_test, color='b', label='Test Score')
         ax1.fill_between(x_values, mean_test + std_test, mean_test - std_test, color='blue', alpha=.2)
+        ax1.set_xscale('log')
         plt.title(pretty_name + ": " + complexity_param + " acccuracy")
         plt.xlabel(complexity_param)
         plt.ylabel("Classification Score")
@@ -86,7 +87,7 @@ def plot_problem_size_scores(problem_dataframe, problem_name, output_dir='./outp
     problem_dataframe = problem_dataframe.set_index('Problem Size')
 
     axis = sns.lineplot(data=problem_dataframe)
-    axis.set_ylabel('Fit)')
+    axis.set_ylabel('Fit')
     axis.legend(loc='lower right')
     axis.set_xlabel('Problem size')
     axis.set_title('Achievable fit score vs problem size: ' + problem_name)
@@ -125,5 +126,22 @@ def plot_iteration_fit(problem_dataframe, problem_name, output_dir='./output'):
     axis.set_xlabel('Iteration') 
     axis.set_title('Fit vs Iteration For All Optimizers on ' + problem_name)
     path = os.path.join(output_dir, problem_name, 'fit_vs_iter.png')       
+    axis.figure.savefig(path, dpi=300)
+    plt.close()
+
+
+def plot_neural_net_analysis(dataframe, dataset_name, output_dir='./output'):
+    # Make a plot of iterations vs score for each.
+
+    # Collect all values from a bunch of dataframes that have param_max_iter in them. 
+    # Make a new dataframe with a column for each alg and iterations as the index. (need to match?)
+    axis = sns.lineplot(data=dataframe)
+    # axis.set_xscale('log')
+    axis.legend(loc='lower right')
+    axis.set_xscale('log')
+    axis.set_ylabel('Accuracy')
+    axis.set_xlabel('Maximum Allowed iterations') 
+    axis.set_title('Accuracy vs Number of Allowed Iterations:' + dataset_name)
+    path = os.path.join(output_dir, "images", 'accuracy_vs_iter.png')       
     axis.figure.savefig(path, dpi=300)
     plt.close()
