@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import sys
 
@@ -22,10 +23,13 @@ def run_experiment(experiment_details, experiment, timing_key, dim, skiprerun, v
 
         if not skiprerun:
             logger.info("Running {} experiment: {} ({})".format(timing_key, details.ds_readable_name, dim))
+            logger.info(" Details: {}".format(details))
             exp.perform()
 
         if dim is not None:
             logger.info("Running with dimension {}".format(dim))
+            if skiprerun:
+                logger.info(" Details: {}".format(details))
             exp.perform_cluster(dim)
     t_d = datetime.now() - t
     timings[timing_key] = t_d.seconds
@@ -87,12 +91,16 @@ if __name__ == '__main__':
             'data': loader.SkyServerData(verbose=verbose, seed=seed),
             'name': 'skyserver',
             'readable_name': 'SkyServer',
+            'best_nn_params': {'NN__activation': ['logistic'], 'NN__alpha': [.01],
+                               'NN__hidden_layer_sizes': [(9, 9, 9)], 'NN__learning_rate_init': [0.016]}
         }
     ausweather_details = {
             'data': loader.AusWeather(verbose=verbose, seed=seed),
             'name': 'AusWeather',
             'readable_name': 'AusWeather',
-        }
+            'best_nn_params': {'NN__activation': ['relu'], 'NN__alpha': [0.001],
+                               'NN__hidden_layer_sizes': [(50, 50)], 'NN__learning_rate_init': [0.016]}
+    }
     if args.skyserver:
         datasets.append(skyserver_details)
     elif args.ausweather:
@@ -108,7 +116,7 @@ if __name__ == '__main__':
         data.build_train_test_split()
         data.scale_standard()
         experiment_details.append(experiments.ExperimentDetails(
-            data, ds['name'], ds['readable_name'],
+            data, ds['name'], ds['readable_name'], ds['best_nn_params'],
             threads=threads,
             seed=seed
         ))
@@ -130,6 +138,7 @@ if __name__ == '__main__':
         if args.pca or args.all:
             run_experiment(experiment_details, experiments.PCAExperiment, 'PCA', args.dim, args.skiprerun,
                            verbose, timings)
+        # NOTE: These were experimented with but ultimately were not used for this assignment.
         # if args.lda or args.all:
         #     run_experiment(experiment_details, experiments.LDAExperiment, 'LDA', args.dim, args.skiprerun,
         #                    verbose, timings)
