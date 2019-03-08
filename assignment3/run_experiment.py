@@ -40,8 +40,8 @@ if __name__ == '__main__':
     parser.add_argument('--skiprerun', action='store_true',
                         help='If true, do not re-run the main experiment before clustering '
                              '(This MUST be used with --dim and a specific experiment)')
-    parser.add_argument('--statlog', action='store_true', help='Run only statlog vehicle')
-    parser.add_argument('--htru2', action='store_true', help='Run only HTRU2')
+    parser.add_argument('--skyserver', action='store_true', help='Run only SkyServer')
+    parser.add_argument('--ausweather', action='store_true', help='Run only Ausweather')
     parser.add_argument('--benchmark', action='store_true', help='Run the benchmark experiments')
     parser.add_argument('--ica', action='store_true', help='Run the ICA experiments')
     parser.add_argument('--pca', action='store_true', help='Run the PCA experiments')
@@ -62,13 +62,13 @@ if __name__ == '__main__':
             parser.print_help()
             sys.exit(1)
 
-    if args.skiprerun and not args.dim:
+    if args.skyserver and not args.dim:
         logger.error("Cannot specify skiprerun without specifying a specific experiment")
         parser.print_help()
         sys.exit(1)
 
-    if args.statlog and args.htru2:
-        logger.error("Can only specify one of '--statlog' or '--htru2', not both")
+    if args.skyserver and args.ausweather:
+        logger.error("Can only specify one of '--skyserver' or '--ausweather', not both")
         parser.print_help()
         sys.exit(1)
 
@@ -83,23 +83,23 @@ if __name__ == '__main__':
     logger.info("----------")
 
     datasets = []
-    statlog_details = {
-            'data': loader.StatlogVehicleData(verbose=verbose, seed=seed),
-            'name': 'statlog_vehicle',
-            'readable_name': 'Statlog Vehicle',
+    skyserver_details = {
+            'data': loader.SkyServerData(verbose=verbose, seed=seed),
+            'name': 'skyserver',
+            'readable_name': 'SkyServer',
         }
-    htru2_details = {
-            'data': loader.HTRU2Data(verbose=verbose, seed=seed),
-            'name': 'htru2',
-            'readable_name': 'HTRU2',
+    ausweather_details = {
+            'data': loader.AusWeather(verbose=verbose, seed=seed),
+            'name': 'AusWeather',
+            'readable_name': 'AusWeather',
         }
-    if args.statlog:
-        datasets.append(statlog_details)
-    elif args.htru2:
-        datasets.append(htru2_details)
-    elif not args.statlog and not args.htru2:
-        datasets.append(statlog_details)
-        datasets.append(htru2_details)
+    if args.skyserver:
+        datasets.append(skyserver_details)
+    elif args.ausweather:
+        datasets.append(ausweather_details)
+    elif not args.skyserver and not args.ausweather:
+        datasets.append(skyserver_details)
+        datasets.append(ausweather_details)
 
     experiment_details = []
     for ds in datasets:
