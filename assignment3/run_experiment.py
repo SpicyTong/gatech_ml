@@ -66,7 +66,7 @@ if __name__ == '__main__':
             parser.print_help()
             sys.exit(1)
 
-    if args.skyserver and not args.dim:
+    if args.skiprerun and not args.dim:
         logger.error("Cannot specify skiprerun without specifying a specific experiment")
         parser.print_help()
         sys.exit(1)
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         datasets.append(ausweather_details)
     elif not args.skyserver and not args.ausweather:
         datasets.append(skyserver_details)
-        datasets.append(ausweather_details)
+        datasets.append(skyserver_details)
 
     experiment_details = []
     for ds in datasets:

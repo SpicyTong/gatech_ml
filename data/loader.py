@@ -114,7 +114,7 @@ class DataLoader(ABC):
         if self.testing_x is not None:
             self.testing_x = StandardScaler().fit_transform(self.testing_x)
 
-    def build_train_test_split(self, test_size=0.3):
+    def build_train_test_split(self, test_size=0.2):
         if not self.training_x and not self.training_y and not self.testing_x and not self.testing_y:
             self.training_x, self.testing_x, self.training_y, self.testing_y = ms.train_test_split(
                 self.features, self.classes, test_size=test_size, random_state=self._seed, stratify=self.classes
@@ -134,7 +134,7 @@ class DataLoader(ABC):
 
         return self.classes
 
-    def dump_test_train_val(self, test_size=0.2, random_state=123):
+    def dump_test_train_val(self, test_size=0.3, random_state=123):
         ds_train_x, ds_test_x, ds_train_y, ds_test_y = ms.train_test_split(self.features, self.classes,
                                                                            test_size=test_size,
                                                                            random_state=random_state,
@@ -485,6 +485,48 @@ class SpamData(DataLoader):
 
     def pre_training_adjustment(self, train_features, train_classes):
         return train_features, train_classes
+
+
+class SkyServerData(DataLoader):
+    def __init__(self, path='data/skyserver_sql2.csv', verbose=False, seed=1):
+        super().__init__(path, verbose, seed)
+
+    def _load_data(self):
+        self._data = pd.read_csv(self._path)
+
+    def data_name(self):
+        return 'SkyServer'
+
+    def class_column_name(self):
+        return 'class'
+
+    def _preprocess_data(self):
+        # Convert class categories to codes.
+        # https://stackoverflow.com/questions/30510562/get-mapping-of-categorical-variables-in-pandas
+        self._data['class'] = self._data['class'].astype('category').cat.codes
+        # Also push classes to the end.
+        classes = self._data.pop('class')
+        self._data['class'] = classes
+
+        self._data.pop('objid')
+        self._data.pop('specobjid')
+        self._data.pop('rerun')
+        self._data.pop('run')
+        self._data.pop('camcol')
+
+
+        num_fewest = self._data[self._data['class'] == 1]['class'].sum()
+        num_to_take = int(np.round(num_fewest * 1.5))
+        df1 = self._data[self._data['class'] == 0].sample(num_to_take, random_state=13)
+        df2 = self._data[self._data['class'] == 2].sample(num_to_take, random_state=13)
+        df3 = self._data[self._data['class'] == 1]
+
+        self._data = pd.concat([df1, df2, df3]).sample(frac=1)
+
+
+    def pre_training_adjustment(self, train_features, train_classes):
+        return train_features, train_classes
+
 
 
 class StatlogVehicleData(DataLoader):
