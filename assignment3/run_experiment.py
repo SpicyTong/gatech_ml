@@ -37,7 +37,7 @@ def run_experiment(experiment_details, experiment, timing_key, dim, skiprerun, v
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Perform some UL and DR')
-    parser.add_argument('--threads', type=int, default=1, help='Number of threads (defaults to 1, -1 for auto)')
+    parser.add_argument('--threads', type=int, default=-1, help='Number of threads (defaults to 1, -1 for auto)')
     parser.add_argument('--seed', type=int, help='A random seed to set, if desired')
     parser.add_argument('--dim', type=int, help='The dim parameter to use for clustering with a specific experiment '
                                                 '(This MUST be used with a specific experiment)')
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         datasets.append(ausweather_details)
     elif not args.skyserver and not args.ausweather:
         datasets.append(skyserver_details)
-        datasets.append(skyserver_details)
+        datasets.append(ausweather_details)
 
     experiment_details = []
     for ds in datasets:

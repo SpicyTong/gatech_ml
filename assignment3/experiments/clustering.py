@@ -51,7 +51,7 @@ class ClusteringExperiment(experiments.BaseExperiment):
     def __init__(self, details, verbose=False):
         super().__init__(details)
         self._verbose = verbose
-        self._nn_arch = [(50, 50), (50,), (25,), (25, 25), (100, 25, 100)]
+        self._nn_arch = [(9, 9), (9, 9, 9), (25,), (25, 25), (50,), (50, 50)]
         self._nn_reg = [10 ** -x for x in range(1, 5)]
         self._clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40]
         self._old_out = None
@@ -104,11 +104,11 @@ class ClusteringExperiment(experiments.BaseExperiment):
             km_labels = km.predict(self._details.ds.training_x)
             gmm_labels = gmm.predict(self._details.ds.training_x)
 
-            sil[k]['Kmeans'] = sil_score(self._details.ds.training_x, km_labels)
-            sil[k]['GMM'] = sil_score(self._details.ds.training_x, gmm_labels)
+            sil[k]['Kmeans'] = sil_score(self._details.ds.training_x, km_labels, metric='manhattan')
+            sil[k]['GMM'] = sil_score(self._details.ds.training_x, gmm_labels, metric='manhattan')
 
-            km_sil_samples = sil_samples(self._details.ds.training_x, km_labels)
-            gmm_sil_samples = sil_samples(self._details.ds.training_x, gmm_labels)
+            km_sil_samples = sil_samples(self._details.ds.training_x, km_labels, metric='manhattan')
+            gmm_sil_samples = sil_samples(self._details.ds.training_x, gmm_labels, metric='manhattan')
             # There has got to be a better way to do this, but I can't brain right now
             for i, x in enumerate(km_sil_samples):
                 sil_s[j] = [k, 'Kmeans', round(x, 6), km_labels[i]]

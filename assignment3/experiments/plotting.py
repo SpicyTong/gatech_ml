@@ -8,9 +8,14 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
+import seaborn as sns
 import matplotlib as mpl
 import matplotlib.axes as maxes
 import matplotlib.pyplot as plt
+sns.set_style('darkgrid')
+sns.set_palette("dark")
+mpl.use('Agg')
+
 
 import matplotlib.cm as cm
 from kneed import KneeLocator
@@ -111,8 +116,8 @@ algos = {
 }
 
 WATERMARK = False
-GATECH_USERNAME = 'DO NOT STEAL'
-TERM = 'Fall 2018'
+GATECH_USERNAME = 'jbaatz3'
+TERM = 'Spring 2019'
 
 
 def watermark(p):
@@ -183,9 +188,9 @@ def plot_scree(title, df, problem_name, multiple_runs=False, xlabel='Number of C
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.grid()
     plt.tight_layout()
 
+    # plt.grid()
     ax = plt.gca()
 
     x_points = df.index.values
@@ -228,8 +233,8 @@ def plot_kmeans_gmm(title, df, xlabel='Number of Clusters', ylabel='Accuracy'):
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.grid()
     plt.tight_layout()
+    # plt.grid()
 
     plt.plot(df.index.values, df['Kmeans'], 'o-', linewidth=1, markersize=2,
              label="k-Means")
@@ -246,9 +251,9 @@ def plot_sse(title, df, xlabel='Number of Clusters', ylabel='SSE'):
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.grid()
     plt.tight_layout()
 
+    # plt.grid()
     plt.plot(df.index.values, df.iloc[:, 0], 'o-', linewidth=1, markersize=2)
     plt.legend(loc="best")
 
@@ -261,9 +266,9 @@ def plot_loglikelihood(title, df, xlabel='Number of Clusters', ylabel='Log Likel
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.grid()
     plt.tight_layout()
 
+    # plt.grid()
     plt.plot(df.index.values, df.iloc[:, 0], 'o-', linewidth=1, markersize=2)
     plt.legend(loc="best")
 
@@ -276,10 +281,10 @@ def plot_bic(title, df, xlabel='Number of Clusters', ylabel='BIC'):
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.grid()
     plt.tight_layout()
 
     plt.plot(df.index.values, df.iloc[:, 0], 'o-', linewidth=1, markersize=2)
+    # plt.grid()
     plt.legend(loc="best")
 
     return plt
@@ -308,14 +313,18 @@ def plot_combined(title, df, data_columns, tsne_data=None, extra_data=None, extr
     if extra_data is not None:
         color_len += 2
 
+    all_plots = []
+
     for column in data_columns:
         if column == 'tsne':
             pass
         else:
-            ax1.plot(df.index.values, df[column], linewidth=1,
-                     label=algos[column]['descriptive_name'])
+            all_plots.append(ax1.plot(df.index.values, df[column], linewidth=1,
+                             label=algos[column]['descriptive_name']))
     if tsne_data is not None:
-        ax2.scatter(tsne_data['x'], tsne_data['y'], c=tsne_data['target'], alpha=0.7, s=5)
+        # ax2.scatter(tsne_data['x'], tsne_data['y'], c=tsne_data['target'], alpha=0.7, s=5)
+        palette = sns.color_palette("bright", 10)
+        sns.scatterplot(x=tsne_data['x'], y=tsne_data['y'], hue=tsne_data['target'], ax=ax2, legend='full', palette=palette)
         ax2.xaxis.set_major_formatter(NullFormatter())
         ax2.yaxis.set_major_formatter(NullFormatter())
         ax2.grid(None)
@@ -324,13 +333,17 @@ def plot_combined(title, df, data_columns, tsne_data=None, extra_data=None, extr
 
     if extra_data is not None and extra_data_name is not None:
         ex_ax = ax1.twinx()
-        ex_ax.plot(extra_data.index.values, extra_data.iloc[:, 0], linewidth=1,
-                   label=extra_data_name)
+        all_plots.append(ex_ax.plot(extra_data.index.values, extra_data.iloc[:, 0], linewidth=1,
+                         label=extra_data_name, color='k'))
         ex_ax.set_ylabel(extra_data_name)
         ex_ax.tick_params('y')
+        # ex_ax.legend(loc="best")
 
-    ax1.legend(loc="best")
+    all_plots = [l[0] for l in all_plots]
+    labels = [l.get_label() for l in all_plots]
+
     ax1.grid()
+    ax1.legend(all_plots, labels, loc="best")
     ax1.axis('tight')
 
     f.tight_layout()
@@ -349,12 +362,14 @@ def plot_tsne(title, df):
 
     ax = plt.gca()
     ax.set_title(title)
-    ax.scatter(df['x'], df['y'], c=df['target'], alpha=0.7, s=5)
+    # ax.scatter(df['x'], df['y'], c=df['target'], alpha=0.7, s=5)
+    # palette = sns.color_palette("bright")
+    sns.scatterplot(x=df['x'], y=df['y'], hue=df['target'].astype(int), ax=ax, legend='full')
     ax.xaxis.set_major_formatter(NullFormatter())
     ax.yaxis.set_major_formatter(NullFormatter())
-    ax.grid(None)
-    ax.set_xticks([])
-    ax.set_yticks([])
+    # ax.grid(None)
+    # ax.set_xticks([])
+    # ax.set_yticks([])
     ax.axis('tight')
 
     return plt
@@ -544,7 +559,7 @@ def read_and_plot_acc(problem, file, output_dir):
 
     title = '{} - {}: Accuracy vs Number of Clusters'.format(ds_readable_name, problem['name'])
     df = pd.read_csv(file).set_index('k')
-    p = plot_sse(title, df)
+    p = plot_acc(title, df)
     p = watermark(p)
     p.savefig(
         '{}/{}/{}_acc.png'.format(output_dir, problem['name'], ds_name),

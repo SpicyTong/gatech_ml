@@ -115,7 +115,7 @@ class DataLoader(ABC):
             self.testing_x = StandardScaler().fit_transform(self.testing_x)
 
     def build_train_test_split(self, test_size=0.2):
-        if not self.training_x and not self.training_y and not self.testing_x and not self.testing_y:
+        if  self.training_x is None or self.training_y is None or self.testing_x is None or self.testing_y is None:
             self.training_x, self.testing_x, self.training_y, self.testing_y = ms.train_test_split(
                 self.features, self.classes, test_size=test_size, random_state=self._seed, stratify=self.classes
             )
