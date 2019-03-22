@@ -175,7 +175,7 @@ def plot_scree(title, df, problem_name, multiple_runs=False, xlabel='Number of C
     if ylabel is None:
         ylabel = 'Kurtosis'
         if problem_name == 'PCA' or problem_name == 'SVD':
-            ylabel = 'Variance'
+            ylabel = 'Explained Variance Ratio'
         elif problem_name == 'RP':
             # ylabel = 'PDCC'  # 'Pairwise distance corrcoef'
             ylabel = 'Pairwise distance corrcoef'
@@ -480,6 +480,16 @@ def plot_sil_samples(title, df, n_clusters):
 
     return plt
 
+def plot_dimreduce_sensitivity(title, df, ylabel):
+    # Expect a dataframe with rows being cluster size and columns being algorithms. 
+    # Only one NN size should be used.
+    # Entries should be mean fit times.
+
+    plot = sns.lineplot(data=df, hue=['PCA', 'ICA', 'RP', 'RF'])
+    plot.set_ylabel(ylabel)
+
+    return plot.get_figure()
+
 
 def get_ds_readable_name(ds_name):
     return ' '.join(map(lambda x: x.capitalize(), ds_name.split('_')))
@@ -493,6 +503,39 @@ def get_ds_name(file, regexp):
     ds_name = search_result.groups()[0]
 
     return ds_name, get_ds_readable_name(ds_name)
+
+def read_and_plot_all_nn_perf(dataset_name, nn_arch='(50, 50)', postfix="_dim_red.csv", alg_list=['PCA', 'ICA', 'RP', 'RF']):
+
+    arch_label = 'param_NN__hidden_layer_sizes'
+    alpha_label = 'param_NN__alpha'
+    alpha_value = .0100
+    mean_times = pd.DataFrame()
+    accuracies = pd.DataFrame()
+    # Read each CSV and extract rows matching the architecture.
+    for alg in alg_list:
+        components = 'param_' + alg.lower() + '__n_components'
+        data = pd.read_csv(os.path.join('output', alg, dataset_name + postfix + '.csv'))
+        select = data.loc[data[arch_label] == nn_arch]
+        select = select.loc[select[alpha_label] == alpha_value]
+        mean_times[alg] = select['mean_fit_time']
+        accuracies[alg] = select['mean_test_score']
+        mean_times['Components'] = select[components]
+        accuracies['Components'] = select[components]
+        
+    mean_times = mean_times.set_index('Components')
+    accuracies = accuracies.set_index('Components')
+
+    timeplot = plot_dimreduce_sensitivity(dataset_name + ': Fit time vs # of Components', mean_times)
+
+    accplot = plot_dimreduce_sensitivity(dataset_name + ': Fit time vs # of Components', accuracies)
+
+    timeplot.savefig('{}/{}/{}_nn_times.png'.format('output', 'benchmark', dataset_name),
+                     format='png', bbox_inches='tight', dpi=150)
+
+    accplot.savefig('{}/{}/{}_nn_acc.png'.format('output', 'benchmark', dataset_name),
+                     format='png', bbox_inches='tight', dpi=150)
+
+
 
 
 def read_and_plot_scree(problem, file, output_dir):

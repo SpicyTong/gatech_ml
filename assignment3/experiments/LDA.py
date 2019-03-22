@@ -32,8 +32,6 @@ class LDAExperiment(experiments.BaseExperiment):
 
         # %% Data for 1
         lda = LatentDirichletAllocation()
-        fs = lda.fit(self._details.ds.training_x, self._details.ds.training_y).explained_variance_ratio_
-
         tmp = pd.Series(np.sort(fs)[::-1])
         tmp.to_csv(self._out.format('{}_scree.csv'.format(self._details.ds_name)))
 

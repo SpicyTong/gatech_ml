@@ -32,8 +32,9 @@ class PCAExperiment(experiments.BaseExperiment):
         # %% Data for 1
         pca = PCA(random_state=self._details.seed)
         pca.fit(self._details.ds.training_x)
-        tmp = pd.Series(data=pca.explained_variance_, index=range(1, min(pca.explained_variance_.shape[0], 500) + 1))
+        tmp = pd.Series(data=np.cumsum(pca.explained_variance_ratio_), index=range(1, min(pca.explained_variance_.shape[0], 500) + 1))
         tmp.to_csv(self._out.format('{}_scree.csv'.format(self._details.ds_name)))
+        pca
 
         # If the ds is small or the number of components is too large, the full solver is used for PCA and as a result
         # we need to re-create the array of dimensions. In that case we'll create a linear distribution from 2 to

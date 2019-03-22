@@ -47,4 +47,4 @@ class BenchmarkExperiment(experiments.BaseExperiment):
         experiments.run_subexperiment(self, self._out.format('clustering/'))
 
     def perform_cluster(self, dim_param):
-        self.log('Clustering for a specific dim is not run for {}'.format(self.experiment_name()))
+        experiments.run_subexperiment(self, self._out.format('clustering/'), updated_ds)
