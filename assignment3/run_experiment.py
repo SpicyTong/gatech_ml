@@ -61,7 +61,7 @@ if __name__ == '__main__':
     threads = args.threads
 
     if args.dim or args.skiprerun:
-        if not args.ica and not args.pca and not args.rf and not args.rp and not args.lda and not args.svd:
+        if not args.ica and not args.pca and not args.rf and not args.rp and not args.lda and not args.svd and not args.benchmark:
             logger.error("Cannot specify dimension/skiprerun without specifying a specific experiment")
             parser.print_help()
             sys.exit(1)

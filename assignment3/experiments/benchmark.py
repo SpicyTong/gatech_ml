@@ -12,9 +12,9 @@ class BenchmarkExperiment(experiments.BaseExperiment):
     def __init__(self, details, verbose=False):
         super().__init__(details)
         self._verbose = verbose
-        self._nn_arch = [(9, 9), (9, 9, 9), (25,), (25, 25), (50,), (50, 50)]
+        self._nn_arch = [(9, 9), (25,), (25, 25), (50,), (50, 50)]
         self._nn_reg = [10 ** -x for x in range(1, 5)]
-        self._clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40]
+        self._clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
     def experiment_name(self):
         return 'benchmark'
@@ -47,4 +47,4 @@ class BenchmarkExperiment(experiments.BaseExperiment):
         experiments.run_subexperiment(self, self._out.format('clustering/'))
 
     def perform_cluster(self, dim_param):
-        experiments.run_subexperiment(self, self._out.format('clustering/'), updated_ds)
+        experiments.run_subexperiment(self, self._out.format('clustering/'))

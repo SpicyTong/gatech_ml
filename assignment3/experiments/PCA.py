@@ -17,10 +17,10 @@ class PCAExperiment(experiments.BaseExperiment):
     def __init__(self, details, verbose=False):
         super().__init__(details)
         self._verbose = verbose
-        self._nn_arch = [(9, 9), (9, 9, 9), (25,), (25, 25), (50,), (50, 50)]
+        self._nn_arch = [(9, 9), (25,), (25, 25), (50,), (50, 50)]
         self._nn_reg = [10 ** -x for x in range(1, 5)]
-        self._clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40]
-        self._dims = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40]
+        self._clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+        self._dims = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
     def experiment_name(self):
         return 'PCA'
@@ -35,6 +35,11 @@ class PCAExperiment(experiments.BaseExperiment):
         tmp = pd.Series(data=np.cumsum(pca.explained_variance_ratio_), index=range(1, min(pca.explained_variance_.shape[0], 500) + 1))
         tmp.to_csv(self._out.format('{}_scree.csv'.format(self._details.ds_name)))
         pca
+
+        tmp = pd.Series(data=pca.explained_variance_, index=range(1, min(pca.explained_variance_.shape[0], 500) + 1))
+        tmp.to_csv(self._out.format('{}_scree_1.csv'.format(self._details.ds_name)))
+        pca
+
 
         # If the ds is small or the number of components is too large, the full solver is used for PCA and as a result
         # we need to re-create the array of dimensions. In that case we'll create a linear distribution from 2 to
