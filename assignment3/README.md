@@ -1,4 +1,6 @@
-# Unsupervised Learning and Dimensionality Reduction
+# Unsupervised Learning and Dimensionality Reduction - jbaatz3
+
+All code can be found at https://github.com/jeffrobots/gatech_ml.git
 
 This code represents all code written, modified, or adopted in order to execute the experiments laid out in my own submission of Assignment 3.
 
