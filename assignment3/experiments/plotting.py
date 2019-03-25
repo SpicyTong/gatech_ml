@@ -480,14 +480,19 @@ def plot_sil_samples(title, df, n_clusters):
 
     return plt
 
-def plot_dimreduce_sensitivity(title, df, ylabel):
+def plot_dimreduce_sensitivity(title, df, ylabel, base=None, hue=['PCA', 'ICA', 'RP', 'RF'], cluster_algs=None, style=sns.color_palette()):
     # Expect a dataframe with rows being cluster size and columns being algorithms. 
     # Only one NN size should be used.
     # Entries should be mean fit times.
     df = df.set_index('Components')
-    plot = sns.lineplot(data=df, hue=['PCA', 'ICA', 'RP', 'RF'])
+    plt.close()
+    plot = sns.lineplot(data=df, hue=hue, palette=style[:len(hue)], dashes=False)
+    # If a base is specified, add a baseline mean time as a horizontal line.
+    if base is not None:
+        plot.axhline(base, xmax=20, linestyle='--', color='k')
     plot.set_ylabel(ylabel)
-    plot.set_xlim(2, 20)
+    plot.set_title(title)
+    # plot.set_xlim(2, 20)
 
     plt.close()
     return plot.get_figure()
@@ -506,7 +511,8 @@ def get_ds_name(file, regexp):
 
     return ds_name, get_ds_readable_name(ds_name)
 
-def read_and_plot_all_nn_perf(dataset_name, nn_arch='(50, 50)', postfix="_dim_red", alg_list=['PCA', 'ICA', 'RP', 'RF']):
+def read_and_plot_all_nn_perf(dataset_name, nn_arch='(25, 25)', postfix="_dim_red",
+                              alg_list=['PCA', 'ICA', 'RP', 'RF']):
 
     arch_label = 'param_NN__hidden_layer_sizes'
     alpha_label = 'param_NN__alpha'
@@ -515,6 +521,10 @@ def read_and_plot_all_nn_perf(dataset_name, nn_arch='(50, 50)', postfix="_dim_re
     mean_times['Components'] = range(0, 50)
     accuracies = pd.DataFrame()
     accuracies['Components'] = range(0, 50)
+    # Get the baseline:
+    baseline = pd.read_csv(os.path.join('output', 'benchmark', dataset_name + "_ass1_nn_bmk.csv"))
+    base_mean_time = baseline['mean_fit_time'][0]
+    base_mean_acc = .895 # baseline['mean_test_score']
     # Read each CSV and extract rows matching the architecture.
     for alg in alg_list:
         if alg == 'RF':
@@ -533,14 +543,52 @@ def read_and_plot_all_nn_perf(dataset_name, nn_arch='(50, 50)', postfix="_dim_re
 
 
 
-    timeplot = plot_dimreduce_sensitivity(dataset_name + ': Fit time vs # of Components', mean_times, 'Mean Fit Time (s)')
+    timeplot = plot_dimreduce_sensitivity(dataset_name + ': Fit time vs # of Components', mean_times, 'Mean Fit Time (s)', base=base_mean_time)
 
-    accplot = plot_dimreduce_sensitivity(dataset_name + ': Fit time vs # of Components', accuracies, 'Mean Accuracy')
+    accplot = plot_dimreduce_sensitivity(dataset_name + ': Accuracy vs # of Components', accuracies, 'Mean Accuracy', base=base_mean_acc)
 
     timeplot.savefig('{}/{}/{}_nn_times.png'.format('output', 'benchmark', dataset_name),
                      format='png', bbox_inches='tight', dpi=150)
 
     accplot.savefig('{}/{}/{}_nn_acc.png'.format('output', 'benchmark', dataset_name),
+                     format='png', bbox_inches='tight', dpi=150)
+
+
+    # Now grab GMM/KMeans data and plot with baseline
+    mean_times = pd.DataFrame()
+    mean_times['Components'] = range(0, 50)
+    accuracies = pd.DataFrame()
+    accuracies['Components'] = range(0, 50)
+    # nn_arch = '(25, 25)'
+    applied_to = ['benchmark', 'RP', 'RF']
+    cluster_algs = ['GMM', 'kmeans']
+    all_hues = []
+    for form in applied_to:
+        for alg in cluster_algs:
+            if alg == 'kmeans':
+                components = 'param_km__n_clusters'
+            else:
+                components = 'param_gmm__n_components'
+            data = pd.read_csv(os.path.join('output', form, 'clustering',  dataset_name + '_cluster_' + alg + '.csv'))
+            select = data.loc[data[arch_label] == nn_arch]
+            select = select.loc[select[alpha_label] == alpha_value]
+            # select = select.rename(columns={components: 'Components'})
+            # mean_times['Components'] = pd.concat([ mean_times['Components'], select[components] ], axis=1).drop_duplicates()
+            # accuracies['Components'] = pd.concat([ accuracies['Components'], select[components] ],  axis=1).drop_duplicates()
+            select = select.set_index(components)
+            mean_times[form + ': ' + alg] = select['mean_fit_time']
+            accuracies[form + ': ' + alg] = select['mean_test_score']
+            all_hues.append(form + ': ' + alg)
+    timeplot = plot_dimreduce_sensitivity(dataset_name + ': Fit time vs # of Components', mean_times,
+                                            'Mean Fit Time (s)', base=base_mean_time, hue=all_hues, style=sns.color_palette("Paired"))
+
+    accplot = plot_dimreduce_sensitivity(dataset_name + ': Accuracy vs # of Components', accuracies,
+                                            'Mean Accuracy', base=base_mean_acc,  hue=all_hues, style=sns.color_palette("Paired"))
+
+    timeplot.savefig('{}/{}/{}_nn_clus_times.png'.format('output', 'benchmark', dataset_name),
+                     format='png', bbox_inches='tight', dpi=150)
+
+    accplot.savefig('{}/{}/{}_nn_clus_acc.png'.format('output', 'benchmark', dataset_name),
                      format='png', bbox_inches='tight', dpi=150)
 
 
@@ -783,8 +831,11 @@ def plot_results():
         logger.info("Processing {}".format(problem_name))
         problem = to_process[problem_name]
 
+
         read_and_plot_problem(problem_name, problem, output_path)
 
+    read_and_plot_all_nn_perf('skyserver')
+    read_and_plot_all_nn_perf('AusWeather')
 
 if __name__ == '__main__':
     plot_results()

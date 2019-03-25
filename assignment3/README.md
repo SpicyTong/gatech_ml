@@ -1,5 +1,18 @@
 # Unsupervised Learning and Dimensionality Reduction
 
+This code represents all code written, modified, or adopted in order to execute the experiments laid out in my own submission of Assignment 3.
+
+In short, all code can be run with the following commands assuming the operator has installed Python3, the required packages in requirements.txt, and is in an Ubuntu environment.
+
+`python run_experiment.py --all`
+`./run_clustering.sh`
+`python run_experiment.py --plot`
+
+Assuming everything executes currectly, the output products are all placed in the `output/` directory. 
+
+
+Further details can reference the README taken directly from Chad Maron's codebase.
+
 ## Requirements
 You will need to use python 3.x with this code, and to pip install the packages in `requirements.txt`. The main addition here is the tables module which _does_ require HDF5. If you are using OS X with Homebrew you can simply `brew install hdf5` before installing the requirements. 
 
