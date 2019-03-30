@@ -52,9 +52,9 @@ if __name__ == '__main__':
     envs = [
         {
             # This is not really a rewarding frozen lake env, but the custom class has extra functionality
-            'env': environments.get_rewarding_no_reward_frozen_lake_environment(),
+            'env': environments.get_rewarding_frozen_lake_environment(),
             'name': 'frozen_lake',
-            'readable_name': 'Frozen Lake (8x8)',
+            'readable_name': 'Frozen Lake Rewarded (8x8)',
         },
         {
             'env': environments.get_large_rewarding_no_reward_frozen_lake_environment(),
