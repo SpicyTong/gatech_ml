@@ -3,6 +3,8 @@ from gym.envs.registration import register
 
 from .cliff_walking import *
 from .frozen_lake import *
+from .taxi import *
+from .cognitive_radio import *
 
 __all__ = ['RewardingFrozenLakeEnv', 'WindyCliffWalkingEnv']
 
@@ -34,6 +36,22 @@ register(
     id='WindyCliffWalking-v0',
     entry_point='environments:WindyCliffWalkingEnv',
 )
+
+register(
+    id='Taxi5x5-v0',
+    entry_point='environments:TaxiEnv'
+)
+
+register(
+    id='CognitiveRadio4x20-v0',
+    entry_point='environments:CognitiveRadio'
+)
+
+def get_cognitive_radio_environment():
+    return gym.make('CognitiveRadio4x20-v0')
+
+def get_taxi_environment():
+    return gym.make('Taxi5x5-v0')
 
 
 def get_rewarding_frozen_lake_environment():

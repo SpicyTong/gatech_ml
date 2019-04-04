@@ -50,22 +50,28 @@ if __name__ == '__main__':
     logger.info("----------")
 
     envs = [
+        # {
+        #     # This is not really a rewarding frozen lake env, but the custom class has extra functionality
+        #     'env': environments.get_rewarding_frozen_lake_environment(),
+        #     'name': 'frozen_lake',
+        #     'readable_name': 'Frozen Lake Rewarded (8x8)',
+        # },
         {
             # This is not really a rewarding frozen lake env, but the custom class has extra functionality
-            'env': environments.get_rewarding_frozen_lake_environment(),
-            'name': 'frozen_lake',
-            'readable_name': 'Frozen Lake Rewarded (8x8)',
-        },
-        {
-            'env': environments.get_large_rewarding_no_reward_frozen_lake_environment(),
-            'name': 'large_frozen_lake',
-            'readable_name': 'Frozen Lake (20x20)',
-        },
-        {
-            'env': environments.get_windy_cliff_walking_environment(),
-            'name': 'cliff_walking',
-            'readable_name': 'Cliff Walking (4x12)',
+            'env': environments.get_cognitive_radio_environment(),
+            'name': 'CognitiveRadio',
+            'readable_name': 'CognitiveRadio(4x20)',
         }
+        # {
+        #     'env': environments.get_large_rewarding_no_reward_frozen_lake_environment(),
+        #     'name': 'large_frozen_lake',
+        #     'readable_name': 'Frozen Lake (20x20)',
+        # },
+        # {
+        #     'env': environments.get_windy_cliff_walking_environment(),
+        #     'name': 'cliff_walking',
+        #     'readable_name': 'Cliff Walking (4x12)',
+        # }
     ]
 
     experiment_details = []
