@@ -17,7 +17,17 @@ MAPS = {
         "OBBBAAOOCCOOAOADDDDY",
         "OOOBAAOOCCOAAAAADDDY",
         "OOOOBOOOOOOOOOOODDDY",
-    ]
+    ],
+    "8x30": [
+        "BBOOOAOOCCCCCCCCOOOCCOCCOCCOCY",
+        "OBBOAAOOCCOOJJOOOAOOOAOOAOAOAY",
+        "OOBBAAOOCCOOJJOOOAOOOAOOAOAOAY",
+        "OOOBAAOOCCOOJJOOOAOOOAOOAOAOAY",
+        "XOOCBBOOOOOOBJOOOBBBOOODDODOOY",
+        "OOOCOBBBBOOOBJOOOBBOOOODODODDY",
+        "OOOCOOBBBOOOOJBOBBOOOOODDODOOY",
+        "OOOCOOOBOOOOOJBBOOOOOOODODODDY"
+]
 }
 
 class CognitiveRadio(discrete.DiscreteEnv):
@@ -54,7 +64,8 @@ class CognitiveRadio(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
 
-    def __init__(self, desc=None, map_name="5x20", rewarding=True, step_reward=0., failure_reward=-500., simple_tdma=False, collision_reward=-5):
+    def __init__(self, desc=None, map_name="5x20", rewarding=True, step_reward=0., failure_reward=-500.,
+                 simple_tdma=False, collision_reward=-5, max_tune_dist=None):
         if desc is None and map_name is None:
             raise ValueError('Must provide either desc or map_name')
         elif desc is None:
@@ -64,15 +75,21 @@ class CognitiveRadio(discrete.DiscreteEnv):
         self.reward_range = (0, nrow)
         self.step_reward = step_reward
         self.collision_reward = collision_reward
-        self.max_tune_dist = nrow
+        if max_tune_dist is None:
+            self.max_tune_dist = nrow
+        else:
+            self.max_tune_dist = max_tune_dist
         self.simple_tdma = simple_tdma
         self.failure_reward = failure_reward
-        self.other_transmits = 'ABCDEFGHIJKLMN'
+        self.other_transmits = 'ABCDEFGHIJ'
         self.end_char = b'Y'
         self.start_char = b'X'
+        self.jam_character = b'J'
         self.num_transmits = 0
         self.required_transmits = 5
         self.adjacent_collision_prob = .25
+        self.out_of_band_tune_multiplier = 5
+        self.reward_base = 1
 
         nA = nrow
         nS = nrow * ncol
@@ -98,7 +115,7 @@ class CognitiveRadio(discrete.DiscreteEnv):
                 for a in range(self.nrow):
                     li = P[s][a]
                     letter = desc[row, col]
-                    if letter in self.end_char:
+                    if letter in self.end_char or letter in self.jam_character:
                         # Game over 
                         li.append((1.0, s, 0, True))
                     else:
@@ -141,28 +158,42 @@ class CognitiveRadio(discrete.DiscreteEnv):
         new_letter = spectrum[new_pos[0], new_pos[1]]
         new_row = new_pos[0]
         old_row = old_pos[0]
-        total_reward = 0.
+        total_reward = self.reward_base
         
         # If the tile is open or the end, compute an inverse linear reward with tune distance.
         if new_letter.astype(str) in "OY":
-            potential_new_reward = self.max_tune_dist - (np.abs(new_row - old_row))**2
+            # If the distance is greater than the tune dist (tuning outside of max dist)
+            # Then we want to give a bigger negative reward that makes this expensive.
+            potential_new_reward = self.max_tune_dist - np.abs(new_row - old_row)
+            if potential_new_reward < 0:
+                potential_new_reward *= self.out_of_band_tune_multiplier
             # If the reward was open but has an occupied channel adjacent to it, compute prob. of collision.
-            row_above = np.clip(new_pos[0] - 1, 0, self.max_tune_dist - 1)
-            row_below = np.clip(new_pos[0] + 1, 0, self.max_tune_dist - 1)
+            row_above = np.clip(new_pos[0] - 1, 0, self.nrow - 1)
+            row_below = np.clip(new_pos[0] + 1, 0, self.nrow - 1)
             above = spectrum[row_above, new_pos[1]].astype(str)
             below = spectrum[row_below, new_pos[1]].astype(str)
-            if above in self.other_transmits or below in self.other_transmits:
+            num_adjacent = 0
+            if above in self.other_transmits:
+                num_adjacent += 1
+            if below in self.other_transmits:
+                num_adjacent += 1
+            if num_adjacent:
+                p_collide = num_adjacent * self.adjacent_collision_prob
                 # With some probability, perform a collision.
-                collision = np.random.choice([True, False], 1, p=[self.adjacent_collision_prob, 1-self.adjacent_collision_prob])
+                collision = np.random.choice([True, False], 1,
+                                                p=[p_collide, 1-p_collide])
                 if collision:
                     potential_new_reward += self.collision_reward
 
             total_reward += potential_new_reward
 
+        elif new_letter == self.jam_character:
+            total_reward += 0
+
         else:
             total_reward += self.collision_reward
 
-        done = str(new_letter) == str(self.end_char)
+        done = str(new_letter) == str(self.end_char) or new_letter == self.jam_character
 
         return total_reward, done
 
@@ -186,13 +217,14 @@ class CognitiveRadio(discrete.DiscreteEnv):
         return {
             b'A': 'purple',
             b'B': 'skyblue',
-            b'C': 'black',
+            b'C': 'yellow',
             b'D': 'brown',
             b'E': 'orange',
             b'F': 'grey',
+            b'J': 'red',
             b'O': 'white',
             b'X': 'green',
-            b'Y': 'red',
+            b'Y': 'green',
         }
 
     def directions(self):
@@ -208,8 +240,14 @@ class CognitiveRadio(discrete.DiscreteEnv):
             3: '3',
             4: '4',
             5: '5',
+            6: '6',
+            7: '7',
+            8: '8',
+            9: '9',
+            10: '10'
         }
 
     def new_instance(self):
         return CognitiveRadio(desc=self.desc,step_reward=self.step_reward, simple_tdma=self.simple_tdma,
-                                      failure_reward=self.failure_reward, collision_reward=self.collision_reward)
+                                      failure_reward=self.failure_reward, collision_reward=self.collision_reward,
+                                      max_tune_dist=self.max_tune_dist)

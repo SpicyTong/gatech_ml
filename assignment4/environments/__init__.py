@@ -43,12 +43,22 @@ register(
 )
 
 register(
-    id='CognitiveRadio4x20-v0',
-    entry_point='environments:CognitiveRadio'
+    id='CognitiveRadio5x20-v0',
+    entry_point='environments:CognitiveRadio',
+    kwargs={'map_name': '5x20', 'simple_tdma': True, 'max_tune_dist': 4}
 )
 
-def get_cognitive_radio_environment():
-    return gym.make('CognitiveRadio4x20-v0')
+register(
+    id='CognitiveRadio8x30-v0',
+    entry_point='environments:CognitiveRadio',
+    kwargs={'map_name': '8x30', 'simple_tdma': False, 'max_tune_dist': 3}
+)
+
+def get_complex_cognitive_radio_environment():
+    return gym.make('CognitiveRadio8x30-v0')
+
+def get_simple_cognitive_radio_environment():
+    return gym.make('CognitiveRadio5x20-v0')
 
 def get_taxi_environment():
     return gym.make('Taxi5x5-v0')

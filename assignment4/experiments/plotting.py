@@ -126,13 +126,15 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
     return fig1, fig2, fig3
 
 
-def plot_policy_map(title, policy, map_desc, color_map, direction_map):
+def plot_policy_map(title, policy, map_desc, color_map, direction_map,
+                    plot_path=True, startchar=b'X', policy_type='numeric'):
     fig = plt.figure()
     ax = fig.add_subplot(111, xlim=(0, policy.shape[1]), ylim=(0, policy.shape[0]))
     font_size = 'x-large'
-    if policy.shape[1] > 16:
+    if policy.shape[1] > 5:
         font_size = 'small'
     plt.title(title)
+    path = []
     for i in range(policy.shape[0]):
         for j in range(policy.shape[1]):
             y = policy.shape[0] - i - 1
@@ -141,14 +143,33 @@ def plot_policy_map(title, policy, map_desc, color_map, direction_map):
             p.set_facecolor(color_map[map_desc[i, j]])
             ax.add_patch(p)
 
+            if map_desc[i, j] == startchar:
+                path.append((i, j))
+
             text = ax.text(x+0.5, y+0.5, direction_map[policy[i, j]], weight='bold', size=font_size,
                            horizontalalignment='center', verticalalignment='center', color='w')
             text.set_path_effects([path_effects.Stroke(linewidth=2, foreground='black'),
                                    path_effects.Normal()])
+    if policy_type == 'numeric':
+        # Create a path list from the start to the end.
+        j = path[0][1]
+        i = path[0][0]
+        while j < policy.shape[1]:
+            i = policy[i, j]
+            j += 1
+            path.append((i, j))
 
-    plt.axis('off')
+
+        xvals = [i[1] +.5 for i in path]
+        yvals = [policy.shape[0] - i[0] - .4 for i in path]
+        ax.plot(xvals, yvals, color='black')
+        
+    
+
+
     plt.xlim((0, policy.shape[1]))
     plt.ylim((0, policy.shape[0]))
+    plt.yticks(range(policy.shape[0]), reversed(range(policy.shape[0])))
     plt.tight_layout()
 
     return watermark(plt)
@@ -158,8 +179,8 @@ def plot_value_map(title, v, map_desc, color_map):
     fig = plt.figure()
     ax = fig.add_subplot(111, xlim=(0, v.shape[1]), ylim=(0, v.shape[0]))
     font_size = 'x-large'
-    if v.shape[1] > 16:
-        font_size = 'small'
+    if v.shape[1] > 8:
+        font_size = 'x-small'
 
     v_min = np.min(v)
     v_max = np.max(v)
@@ -167,9 +188,9 @@ def plot_value_map(title, v, map_desc, color_map):
     v_red = np.digitize(v, bins)/100.0
     for i in range(v.shape[0]):
         for j in range(v.shape[1]):
-            value = np.round(v[i, j], 2)
+            value = np.round(v[i, j], 1)
             if len(str(value)) > 4:
-                font_size = 'small'
+                font_size = 'x-small'
 
     plt.title(title)
     for i in range(v.shape[0]):
@@ -180,7 +201,7 @@ def plot_value_map(title, v, map_desc, color_map):
             p.set_facecolor(color_map[map_desc[i, j]])
             ax.add_patch(p)
 
-            value = np.round(v[i, j], 2)
+            value = np.round(v[i, j], 1)
 
             red = v_red[i, j]
             text2 = ax.text(x+0.5, y+0.5, value, size=font_size,
