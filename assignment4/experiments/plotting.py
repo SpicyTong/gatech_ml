@@ -6,9 +6,12 @@ import numpy as np
 import os
 import pandas as pd
 import re
+import seaborn as sns
 
 from os.path import basename
 from matplotlib import pyplot as plt
+sns.set_style('darkgrid')
+sns.set_palette("dark")
 from shutil import copyfile
 
 
@@ -68,7 +71,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
     # Plot the episode length over time, both as a line and histogram
     fig1 = plt.figure(figsize=(10, 5))
     plt.subplot(121)
-    plt.grid()
+    # plt.grid()
     plt.tight_layout()
     plt.plot(stats['length'])
     plt.xlabel("Episode")
@@ -76,7 +79,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
     plt.title("Episode Length over Time")
     plt.subplot(122)
     plt.hist(stats['length'], zorder=3)
-    plt.grid(zorder=0)
+    # plt.grid(zorder=0)
     plt.xlabel("Episode Length")
     plt.ylabel("Count")
     plt.tight_layout()
@@ -89,7 +92,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
         smoothing_window, min_periods=smoothing_window
     ).mean()
     plt.subplot(121)
-    plt.grid()
+    # plt.grid()
     plt.tight_layout()
     plt.plot(rewards_smoothed)
     plt.xlabel("Episode")
@@ -98,7 +101,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
     plt.subplot(122)
     plt.tight_layout()
     plt.hist(stats['reward'], zorder=3)
-    plt.grid(zorder=0)
+    # plt.grid(zorder=0)
     plt.xlabel("Episode Reward")
     plt.ylabel("Count")
     plt.title(title_base.format("Episode Reward (Histogram)"))
@@ -107,7 +110,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
     # Plot time steps and episode number
     fig3 = plt.figure(figsize=(10, 5))
     plt.subplot(121)
-    plt.grid()
+    # plt.grid()
     plt.tight_layout()
     time_steps = np.cumsum(stats['time'])
     plt.plot(time_steps, np.arange(len(stats['time'])))
@@ -117,7 +120,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
     plt.subplot(122)
     plt.tight_layout()
     plt.hist(time_steps, zorder=3)
-    plt.grid(zorder=0)
+    # plt.grid(zorder=0)
     plt.xlabel("Time Step")
     plt.ylabel("Count")
     plt.title(title_base.format("Episode Time (Histogram)"))
@@ -127,7 +130,7 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
 
 
 def plot_policy_map(title, policy, map_desc, color_map, direction_map,
-                    plot_path=True, startchar=b'X', policy_type='numeric'):
+                    plot_path=True, startchar=b'X', policy_type='numeric', endchar=[b'J', b'Y']):
     fig = plt.figure()
     ax = fig.add_subplot(111, xlim=(0, policy.shape[1]), ylim=(0, policy.shape[0]))
     font_size = 'x-large'
@@ -155,6 +158,8 @@ def plot_policy_map(title, policy, map_desc, color_map, direction_map,
         j = path[0][1]
         i = path[0][0]
         while j < policy.shape[1]:
+            if map_desc[i, j] in endchar:
+                break
             i = policy[i, j]
             j += 1
             path.append((i, j))
@@ -223,7 +228,7 @@ def plot_time_vs_steps(title, df, xlabel="Steps", ylabel="Time (s)"):
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.grid()
+    # plt.grid()
     plt.tight_layout()
 
     plt.plot(df.index.values, df['time'], '-', linewidth=1)
@@ -244,11 +249,11 @@ def plot_reward_and_delta_vs_steps(title, df, xlabel="Steps", ylabel="Reward"):
     lns1 = ax.plot(df.index.values, df['reward'], linewidth=1, label=ylabel)
 
     ex_ax = ax.twinx()
-    lns2 = ex_ax.plot(df.index.values, df['delta'], linewidth=1, label='Delta')
+    lns2 = ex_ax.plot(df.index.values, df['delta'], linewidth=1, label='Delta', color='red')
     ex_ax.set_ylabel('Delta')
     ex_ax.tick_params('y')
 
-    ax.grid()
+    # ax.grid()
     ax.axis('tight')
 
     f.tight_layout()

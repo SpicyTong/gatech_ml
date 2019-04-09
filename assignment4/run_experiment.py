@@ -58,16 +58,22 @@ if __name__ == '__main__':
         # },
         {
             # This is not really a rewarding frozen lake env, but the custom class has extra functionality
-            'env': environments.get_complex_cognitive_radio_environment(),
-            'name': 'ComplexCognitiveRadio',
-            'readable_name': 'CognitiveRadio(8x30)',
-        },
-        {
-            # This is not really a rewarding frozen lake env, but the custom class has extra functionality
             'env': environments.get_simple_cognitive_radio_environment(),
-            'name': 'SimpleCognitiveRadio',
-            'readable_name': 'CognitiveRadio(5x20)',
+            'name': 'SimpleMidRadio',
+            'readable_name': 'SimpleRadio8x30',
         }
+        # {
+        #     # This is not really a rewarding frozen lake env, but the custom class has extra functionality
+        #     'env': environments.get_complex_cognitive_radio_environment(),
+        #     'name': 'ComplexMidRadio',
+        #     'readable_name': 'CognitiveRadio8x30',
+        # },
+        # {
+        #     # This is not really a rewarding frozen lake env, but the custom class has extra functionality
+        #     'env': environments.get_large_complex_cognitive_radio_environment(),
+        #     'name': 'ComplexLargeRadio',
+        #     'readable_name': 'CognitiveRadio10x40',
+        # }
         # {
         #     'env': environments.get_windy_cliff_walking_environment(),
         #     'name': 'cliff_walking',

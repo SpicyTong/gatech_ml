@@ -27,6 +27,18 @@ MAPS = {
         "OOOCOBBBBOOOBJOOOBBOOOODODODDY",
         "OOOCOOBBBOOOOJBOBBOOOOODDODOOY",
         "OOOCOOOBOOOOOJBBOOOOOOODODODDY"
+    ],
+    "10x40": [
+        "OOOOODOOODOOODOOODOOODOOODOOODOOODOOODOY",
+        "OOOOODOOODOOODOOODOOODOOODOOODOOODOOODOY",
+        "OOOOODOOODOOODOOODOOODOOODOOODOOODOOODOY",
+        "OJJJJJOOOOOOOJJJJJJJJOOOOOOOOJJJJJOOOOOY",
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY",
+        "OOAAAOOOAOOOAOOOAOOOAOOOAOOAOOOAOOOAOOOY",
+        "OBBOBBOBBOOOOBBBBOOOOOOOOOOOOOBBBOBBOOOY",
+        "XOOOOOOBBBBOOBBOOOOOOOCCCOOOOOCCCOOOCCCY",
+        "OCCCOOOOOOCCCCCCCOOOCCOOOCCCOOOOOCCCOOOY",
+        "OOOCCOOCCCOOOOOOOCCCOOOOOOOOOOOOOOOOOOOY"
 ]
 }
 
@@ -64,15 +76,15 @@ class CognitiveRadio(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
 
-    def __init__(self, desc=None, map_name="5x20", rewarding=True, step_reward=0., failure_reward=-500.,
-                 simple_tdma=False, collision_reward=-5, max_tune_dist=None):
+    def __init__(self, desc=None, map_name="5x20", rewarding=True, step_reward=1, failure_reward=-100,
+                 simple_tdma=False, collision_reward=-2, max_tune_dist=None):
         if desc is None and map_name is None:
             raise ValueError('Must provide either desc or map_name')
         elif desc is None:
             desc = MAPS[map_name]
         self.desc = desc = np.asarray(desc, dtype='c')
         self.nrow, self.ncol = nrow, ncol = desc.shape
-        self.reward_range = (0, nrow)
+        self.reward_range = (0, nrow) 
         self.step_reward = step_reward
         self.collision_reward = collision_reward
         if max_tune_dist is None:
@@ -85,11 +97,9 @@ class CognitiveRadio(discrete.DiscreteEnv):
         self.end_char = b'Y'
         self.start_char = b'X'
         self.jam_character = b'J'
-        self.num_transmits = 0
-        self.required_transmits = 5
-        self.adjacent_collision_prob = .25
-        self.out_of_band_tune_multiplier = 5
-        self.reward_base = 1
+        self.adjacent_collision_prob = .15
+        self.out_of_band_tune_multiplier = 2
+        self.tune_distance_reward_ratio = .5
 
         nA = nrow
         nS = nrow * ncol
@@ -158,13 +168,13 @@ class CognitiveRadio(discrete.DiscreteEnv):
         new_letter = spectrum[new_pos[0], new_pos[1]]
         new_row = new_pos[0]
         old_row = old_pos[0]
-        total_reward = self.reward_base
+        total_reward = self.step_reward
         
         # If the tile is open or the end, compute an inverse linear reward with tune distance.
         if new_letter.astype(str) in "OY":
             # If the distance is greater than the tune dist (tuning outside of max dist)
             # Then we want to give a bigger negative reward that makes this expensive.
-            potential_new_reward = self.max_tune_dist - np.abs(new_row - old_row)
+            potential_new_reward = (self.max_tune_dist - np.abs(new_row - old_row)) * self.tune_distance_reward_ratio
             if potential_new_reward < 0:
                 potential_new_reward *= self.out_of_band_tune_multiplier
             # If the reward was open but has an occupied channel adjacent to it, compute prob. of collision.
@@ -183,7 +193,7 @@ class CognitiveRadio(discrete.DiscreteEnv):
                 collision = np.random.choice([True, False], 1,
                                                 p=[p_collide, 1-p_collide])
                 if collision:
-                    potential_new_reward += self.collision_reward
+                    potential_new_reward += self.collision_reward * num_adjacent
 
             total_reward += potential_new_reward
 

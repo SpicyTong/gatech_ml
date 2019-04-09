@@ -133,7 +133,7 @@ class ExperimentStats(object):
             value_file_name = file_name_base.format('Value', 'Last')
             title = '{}: {} - {} {}'.format(details.env_readable_name, experiment, 'Last', step_preamble)
 
-            p = plot_policy_map(title, policy, map_desc, color_map, direction_map)
+            p = plot_policy_map(title, policy, map_desc, color_map, direction_map) #, policy_type=None)
             p.savefig(policy_file_name, format='png', dpi=150)
             p.close()
 
@@ -157,7 +157,7 @@ class ExperimentStats(object):
 
                     title = '{}: {} - {} {}'.format(details.env_readable_name, experiment, step_preamble, i)
 
-                    p = plot_policy_map(title, policy, map_desc, color_map, direction_map)
+                    p = plot_policy_map(title, policy, map_desc, color_map, direction_map)#, policy_type=None)
                     p.savefig(file_name, format='png', dpi=150)
                     p.close()
 
